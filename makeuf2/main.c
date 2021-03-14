@@ -1,17 +1,54 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 #include <errno.h>
 #include "defs.h"
 
 
-static uint size;
+static char *input, *output;
+static uint size, flash;
 static char data[128 * 1024] = {0};
 
 
 void check_arguments(int argc, char **argv) {
-	if (argc != 3) {
-		printf(" Usage: %s [input] [output]\n", argv[0]);
+	int c;
+
+	flash = 0;
+	input = 0;
+	output = 0;
+
+	while ((c = getopt(argc, argv, "i:o:fh")) != -1) {
+		switch (c) {
+		case 'i':
+			input = optarg;
+			break;
+		case 'o':
+			output = optarg;
+			break;
+		case 'f':
+			flash = 1;
+			break;
+		case 'h':
+			printf(" Usage: %s -i [input] -o [output]\n", argv[0]);
+			printf(" i - input file\n");
+			printf(" o - output file (uf2)\n");
+			printf(" f - write to flash\n");
+			printf(" h - print help\n");
+			printf("\n");
+			exit(0);
+		case '?':
+			printf(" Unknown option: %c\n", optopt);
+			exit(-1);
+		}
+	}
+
+	if (!input) {
+		printf(" Required -i [input] option.\n");
+		exit(-1);
+	}
+	if (!output) {
+		printf(" Required -o [output] option.\n");
 		exit(-1);
 	}
 }
@@ -34,7 +71,7 @@ void load_file(char *fname) {
 	fclose(fd);
 }
 
-void add_crc() {
+void add_crc_to_first_256() {
 	struct crc_param cp;
 
 	// from RPi Pico doc
@@ -65,9 +102,10 @@ void write_uf2(char *name) {
 		exit(-21);
 	}
 
-	blocks_count = (size + 256) >> 8;
-	addr = 0x20000000;	// 0x10000000 flash, 0x20000000 ram
 	offs = 0;
+	blocks_count = (size + 256) >> 8;
+	if (flash) addr = RPI_FLASH;
+	else addr = RPI_SRAM;
 
 	printf(" Blocks: %d.\n", blocks_count);
 
@@ -75,15 +113,15 @@ void write_uf2(char *name) {
 
 		bl.magicStart0	= UF2_MAGICSTART0;
 		bl.magicStart1	= UF2_MAGICSTART1;
-		bl.flags	= 0x00002000;		// familyID present
+		bl.flags		= 0x00002000;		// familyID present
 		bl.targetAddr	= addr;
 		bl.payloadSize	= 0x00000100;	// 256 B per block
-		bl.blockNo	= i;
+		bl.blockNo		= i;
 		bl.numBlocks	= blocks_count;
-		bl.fileSize	= UF2_RPIPICO_ID;
+		bl.fileSize		= UF2_RPIPICO_ID;
 		memset(&bl.data, 0, DATA_SIZE);
 		memcpy(&bl.data, data + offs, 256);
-		bl.magicEnd	= UF2_MAGICEND;
+		bl.magicEnd		= UF2_MAGICEND;
 
 		if (fwrite(&bl, 1, sizeof(bl), fd) != BLOCK_SIZE) {
 			printf(" ERROR: save_file: write fail.\n");
@@ -98,8 +136,8 @@ void write_uf2(char *name) {
 
 int main(int argc, char **argv) {
 	check_arguments(argc, argv);
-	load_file(argv[1]);
-	add_crc();
-	write_uf2(argv[2]);
+	load_file(input);
+	add_crc_to_first_256();
+	write_uf2(output);
 	return 0;
 }

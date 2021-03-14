@@ -51,9 +51,9 @@ void init() {
 
 	while(1) {
 		*((volatile unsigned int*)(SIO_BASE + 0x14)) = 1 << 25;
-		delay(20000);
+		delay(2000000);
 		*((volatile unsigned int*)(SIO_BASE + 0x18)) = 1 << 25;
-		delay(20000);
+		delay(200000);
 	}
 }
 

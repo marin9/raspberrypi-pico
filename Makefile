@@ -30,7 +30,7 @@ run: $(TARGET).bin $(TARGET).list $(TARGET).uf2
 
 $(TARGET).uf2 : $(TARGET).bin
 	@echo " Create\t\t" $@
-	@./$(MKUF2) $< $@
+	@./$(MKUF2) -i $< -o $@
 
 $(TARGET).list: $(TARGET).elf
 	@echo " Create\t\t" $@

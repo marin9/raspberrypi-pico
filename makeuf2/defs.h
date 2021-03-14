@@ -1,5 +1,6 @@
 #pragma once
 
+// UF2 defines
 #define BLOCK_SIZE	512
 #define HEADER_SIZE	(8 * 4)
 #define DATA_SIZE	(BLOCK_SIZE - HEADER_SIZE - 4)
@@ -8,6 +9,10 @@
 #define UF2_MAGICSTART1	0x9e5d5157
 #define UF2_MAGICEND		0x0ab16f30
 #define UF2_RPIPICO_ID		0xe48bff56
+
+// RPi Pico defines
+#define RPI_FLASH		0x10000000
+#define RPI_SRAM		0x20000000
 
 
 typedef unsigned int uint;
