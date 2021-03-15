@@ -11,7 +11,6 @@ OBJ=$(SRC:.c=.o)
 $(TARGET): $(OBJ)
 	@echo " Compile" $@
 	@$(CC) $(OBJ) -o $@ $(LF)
-	@cp $(TARGET) ../$(TARGET)
 
 %.o : %.c $(INC)
 	@echo " Compile" $<

@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include "defs.h"
 
@@ -8,17 +7,13 @@ int crc32(char *data, uint size, struct crc_param param) {
 	uint i, j, crcn;
 	unsigned char byte;
 
-	if (!data || !size) {
-		printf(" ERROR: crc32: Illegal parameters.\n");
+	if (!data || !size)
 		return -1;
-	}
 
 	// initialize
 	table = (uint*)malloc(4 * size);
-	if (!table) {
-		printf(" ERROR: crc32: No memory.\n");
+	if (!table)
 		return -2;
-	}
 
 	// generate table
 	for (i = 0; i < size; ++i) {

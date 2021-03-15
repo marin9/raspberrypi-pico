@@ -11,8 +11,14 @@
 #define UF2_RPIPICO_ID		0xe48bff56
 
 // RPi Pico defines
+#define RPI_BLOCK_SIZE	256
 #define RPI_FLASH		0x10000000
 #define RPI_SRAM		0x20000000
+#define RPI_CRC_POLYN	0x04c11db7
+#define RPI_CRC_INIT	0xffffffff
+#define RPI_CRC_FXOR	0x00000000
+
+#define MAX_PROG_SIZE	(128 * 1024)
 
 
 typedef unsigned int uint;

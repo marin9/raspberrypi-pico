@@ -7,7 +7,7 @@ LOPS = -nostdlib -nostartfiles
 
 LINKER = memory.ld
 TARGET = prog
-MKUF2 = mkuf2
+MKUF2 = ../mkuf2
 
 ASM	:= start.s
 SRC	:= init.c
