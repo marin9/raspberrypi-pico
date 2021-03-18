@@ -12,8 +12,9 @@ MKUF2 = ../mkuf2
 ASM	:= start.s
 SRC	:= init.c
 SRC += gpio.c
+SRC += resets.c
 
-INC	:= $(wildcard *.h)
+INC		:= $(wildcard *.h)
 OBJA	:= $(ASM:%.s=%.o)
 OBJC	:= $(SRC:%.c=%.o)
 
@@ -57,4 +58,3 @@ clean :
 	@echo " Clean"
 	@rm -f *.o
 	@rm -f $(TARGET).*
-

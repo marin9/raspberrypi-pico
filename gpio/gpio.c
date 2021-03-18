@@ -1,72 +1,85 @@
 #include "gpio.h"
 
-#define APB_BASE			0x40000000
-#define SIO_BASE			0xd0000000
+struct io_bank0_hw {
+	struct gpio {
+		uint status;
+		uint ctrl;
+	} gpio[29];
+	// TODO
+};
 
-#define GPIO_IN				(SIO_BASE + 0x04)
-#define GPIO_OUT			(SIO_BASE + 0x10)
-#define GPIO_OUT_SET		(SIO_BASE + 0x14)
-#define GPIO_OUT_CLR		(SIO_BASE + 0x18)
-#define GPIO_OUT_XOR		(SIO_BASE + 0x1C)
-#define GPIO_OE				(SIO_BASE + 0x20)
-#define GPIO_OE_SET			(SIO_BASE + 0x24)
-#define GPIO_OE_CLR			(SIO_BASE + 0x28)
-#define GPIO_OE_XOR			(SIO_BASE + 0x2C)
+struct pads_bank0_hw {
+	uint voltage_select;
+	uint gpio[29];
+	uint swclk;
+	uint swd;
+};
 
-#define IO_BANK_BASE		(APB_BASE + 0x14000)
-#define PADS_BANK0_BASE		(APB_BASE + 0x1C000)
+struct sio_hw {
+	uint cpuid;
+	uint gpio_in;
+	uint gpio_hi_in;
+	uint unused;
+	uint gpio_out;
+	uint gpio_out_set;
+	uint gpio_out_clr;
+	uint gpio_out_xor;
+	uint gpio_oe;
+	uint gpio_oe_set;
+	uint gpio_oe_clr;
+	uint gpio_oe_xor;
+	//TODO
+};
 
-
-
-#define WR(reg, val)	*((volatile unsigned int*)(reg)) = (val)
-#define RD(reg)			*((volatile unsigned int*)(reg))
-
-
+#define io		((volatile struct io_bank0_hw*)IO_BANK0_BASE)
+#define pads 	((volatile struct pads_bank0_hw*)PADS_BANK0_BASE)
+#define sio		((volatile struct sio_hw*)SIO_BASE)
 
 
 void gpio_init(uint gpio, uint fn) {
-	WR(IO_BANK_BASE + (gpio * 8) + 4, fn);
+	io->gpio[gpio].ctrl = fn;
+	//TODO
 }
 
 void gpio_set_pull(uint gpio, uint up, uint down) {
 	uint reg = 0;
-	
+
 	if (down)
 		reg |= (1 << 2);
 	if (up)
 		reg |= (1 << 3);
-		
-	WR(PADS_BANK0_BASE + 4 + (gpio * 4), reg);
+
+	pads->gpio[gpio] = reg;
 }
 
 void gpio_set_dir(uint gpio, uint out) {
 	if (out)
-		WR(GPIO_OE_SET, 1 << gpio);
+		sio->gpio_oe_set = 1 << gpio;
 	else
-		WR(GPIO_OE_CLR, 1 << gpio);
+		sio->gpio_oe_clr = 1 << gpio;
 }
 
 void gpio_set_dir_all(uint mask) {
-	WR(GPIO_OE, mask);
+	sio->gpio_oe = mask;
 }
 
 void gpio_set(uint gpio, uint val) {
 	if (val)
-		WR(GPIO_OUT_SET, 1 << gpio);
+		sio->gpio_out_set = 1 << gpio;
 	else
-		WR(GPIO_OUT_CLR, 1 << gpio);
+		sio->gpio_out_clr = 1 << gpio;
 }
 
 void gpio_set_all(uint mask) {
-	WR(GPIO_OUT, mask);
+	sio->gpio_out = mask;
 }
 
 uint gpio_get(uint gpio) {
-	return RD(GPIO_IN) & (1 << gpio);
+	return sio->gpio_in & (1 << gpio);
 }
 
 uint gpio_get_all() {
-	return RD(GPIO_IN);
+	return sio->gpio_in;
 }
 
 
@@ -79,4 +92,3 @@ void gpio_ack_irq(uint gpio, uint event) {
 	//TODO
 }
 */
-

@@ -1,4 +1,5 @@
 #pragma once
+#include "pico.h"
 
 #define RESET_ADC			0
 #define RESET_BUSCTRL		1
@@ -30,4 +31,3 @@
 void reset_block(uint block);
 void unreset_block(uint block);
 void unreset_block_wait(uint block);
-
