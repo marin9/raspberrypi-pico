@@ -13,6 +13,7 @@ ASM	:= start.s
 SRC	:= init.c
 SRC += gpio.c
 SRC += resets.c
+SRC += testcase.c
 
 INC		:= $(wildcard *.h)
 OBJA	:= $(ASM:%.s=%.o)

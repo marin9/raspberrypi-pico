@@ -7,9 +7,14 @@ void delay(int t) {
 		asm volatile ("nop");
 }
 
+void tc1();
+
 void init() {
 
-	unreset_block_wait(RESET_IO_BANK0);
+	reset_release_wait(RESET_IO_BANK0);
+	reset_release_wait(RESET_PADS_BANK0);
+
+	tc1();
 
 	gpio_init(25, GPIO_FUNC_SIO);
 	gpio_set_dir(25, 1);

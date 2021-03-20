@@ -1,8 +1,6 @@
 #pragma once
-
 // ROM
 #define ROM_BASE					0x00000000
-
 // FLASH
 #define XIP_BASE					0x10000000
 #define XIP_NOALLOC_BASE			0x11000000
@@ -12,7 +10,6 @@
 #define XIP_SRAM_BASE				0x15000000
 #define XIP_SRAM_END				0x15004000
 #define XIP_SSI_BASE				0x18000000
-
 // SRAM
 #define SRAM_BASE					0x20000000
 #define SRAM_STRIPED_BASE			0x20000000
@@ -24,7 +21,6 @@
 #define SRAM1_BASE					0x21010000
 #define SRAM2_BASE					0x21020000
 #define SRAM3_BASE					0x21030000
-
 // APB
 #define SYSINFO_BASE				0x40000000
 #define SYSCFG_BASE					0x40004000
@@ -53,7 +49,6 @@
 #define ROSC_BASE					0x40060000
 #define VREG_AND_CHIP_RESET_BASE	0x40064000
 #define TBMAN_BASE					0x4006c000
-
 // AHB
 #define DMA_BASE					0x50000000
 #define USBCTRL_BASE				0x50100000
@@ -62,10 +57,8 @@
 #define PIO0_BASE					0x50200000
 #define PIO1_BASE					0x50300000
 #define XIP_AUX_BASE				0x50400000
-
 // SIO
 #define SIO_BASE					0xd0000000
-
 // CM0+ internal peripherals
 #define PPB_BASE					0xe0000000
 
@@ -73,5 +66,3 @@
 typedef unsigned int uint;
 typedef unsigned short ushort;
 typedef unsigned char byte;
-
-

@@ -5,4 +5,3 @@ MEMORY {
 SECTIONS {
 	.text : { *(.text*) } > ram
 }
-
