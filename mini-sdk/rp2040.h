@@ -25,30 +25,30 @@
 #define SYSINFO_BASE				0x40000000
 #define SYSCFG_BASE					0x40004000
 #define CLOCKS_BASE					0x40008000
-#define RESETS_BASE					0x4000c000
+#define RESETS_BASE					0x4000C000
 #define PSM_BASE					0x40010000
 #define IO_BANK0_BASE				0x40014000
 #define IO_QSPI_BASE				0x40018000
-#define PADS_BANK0_BASE				0x4001c000
+#define PADS_BANK0_BASE				0x4001C000
 #define PADS_QSPI_BASE				0x40020000
 #define XOSC_BASE					0x40024000
 #define PLL_SYS_BASE				0x40028000
-#define PLL_USB_BASE				0x4002c000
+#define PLL_USB_BASE				0x4002C000
 #define BUSCTRL_BASE				0x40030000
 #define UART0_BASE					0x40034000
 #define UART1_BASE					0x40038000
-#define SPI0_BASE					0x4003c000
+#define SPI0_BASE					0x4003C000
 #define SPI1_BASE					0x40040000
 #define I2C0_BASE					0x40044000
 #define I2C1_BASE					0x40048000
-#define ADC_BASE					0x4004c000
+#define ADC_BASE					0x4004C000
 #define PWM_BASE					0x40050000
 #define TIMER_BASE					0x40054000
 #define WATCHDOG_BASE				0x40058000
-#define RTC_BASE					0x4005c000
+#define RTC_BASE					0x4005C000
 #define ROSC_BASE					0x40060000
 #define VREG_AND_CHIP_RESET_BASE	0x40064000
-#define TBMAN_BASE					0x4006c000
+#define TBMAN_BASE					0x4006C000
 // AHB
 #define DMA_BASE					0x50000000
 #define USBCTRL_BASE				0x50100000
@@ -58,9 +58,9 @@
 #define PIO1_BASE					0x50300000
 #define XIP_AUX_BASE				0x50400000
 // SIO
-#define SIO_BASE					0xd0000000
+#define SIO_BASE					0xD0000000
 // CM0+ internal peripherals
-#define PPB_BASE					0xe0000000
+#define PPB_BASE					0xE0000000
 
 
 typedef unsigned int uint;

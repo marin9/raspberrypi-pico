@@ -1,6 +1,23 @@
 #include "gpio.h"
 
-// test gpio in/out
+
+// test led blink (25)
+void tc0() {
+    uint dl;
+    gpio_init(25, GPIO_FUNC_SIO);
+    gpio_set_dir(25, 1);
+
+    while (1) {
+        gpio_set(25, 1);
+        dl = 100000;
+        while (dl--) asm volatile ("nop");
+        gpio_set(25, 0);
+        dl = 100000;
+        while (dl--) asm volatile ("nop");
+    }
+}
+
+// test gpio in(5)/out(0, 1, 2)
 void tc1() {
     uint blink, stat, dl;
 

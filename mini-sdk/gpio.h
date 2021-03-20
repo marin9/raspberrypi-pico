@@ -11,7 +11,7 @@
 #define GPIO_FUNC_PIO1			7
 #define GPIO_FUNC_CLK			8
 #define GPIO_FUNC_USB			9
-#define GPIO_FUNC_NULL			0xf
+#define GPIO_FUNC_NULL			0xF
 
 #define GPIO_IRQ_LEVEL_LOW		1
 #define GPIO_IRQ_LEVEL_HIGH		2
