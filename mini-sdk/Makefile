@@ -9,9 +9,10 @@ LINKER = memory.ld
 TARGET = prog
 MKUF2 = ../mkuf2
 
-ASM	:= start.s
-SRC	:= init.c
+ASM := start.s
+SRC := init.c
 SRC += gpio.c
+SRC += uart.c
 SRC += resets.c
 SRC += testcase.c
 

@@ -38,7 +38,7 @@ struct sio_hw {
 
 void gpio_init(uint gpio, uint fn) {
 	io->gpio[gpio].ctrl = fn;
-	pads->gpio[gpio] = (1 << 6) | (1 << 3); // input enable
+	//pads->gpio[gpio] = (1 << 6) | (1 << 3); // input enable
 }
 
 void gpio_set_pull(uint gpio, uint up, uint down) {
