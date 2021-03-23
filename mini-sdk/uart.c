@@ -13,7 +13,7 @@ struct uart {
 	uint cr;
 };
 
-#define uart0 ((struct uart*)UART0_BASE)
+#define uart0 ((volatile struct uart*)UART0_BASE)
 
 
 
@@ -26,10 +26,11 @@ void uart_init() {
 
 void uart_print(char *s) {
     while (*s) {
-	while (1)
-		if ((uart0->fr & (1<<5))==0) break;
+		while (1)
+			if (((uart0->fr) & (1<<5))==0)
+				break;
 
-	uart0->dr = *s;
+		uart0->dr = *s;
         ++s;
     }
 }
