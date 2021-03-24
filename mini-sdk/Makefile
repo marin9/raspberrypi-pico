@@ -1,36 +1,30 @@
-ARMGNU = arm-none-eabi
-XCPU = -mcpu=cortex-m0
+ARMGNU	= arm-none-eabi
+XCPU	= -mcpu=cortex-m0
+AOPS	= --warn --fatal-warnings $(XCPU)
+COPS	= -Wall -Wextra -O2 -ffreestanding $(XCPU) -fpic -mthumb
+LOPS	= -nostdlib -nostartfiles
 
-AOPS = --warn --fatal-warnings $(XCPU)
-COPS = -Wall -Wextra -O2 -ffreestanding $(XCPU) -fpic -mthumb
-LOPS = -nostdlib -nostartfiles
+LINKER	= memory.ld
+TARGET	= prog
+MKUF2	= ../mkuf2
+RUNSC	= ../run.sh
 
-LINKER = memory.ld
-TARGET = prog
-MKUF2 = ../mkuf2
-
-ASM := start.s
-SRC := init.c
-SRC += gpio.c
-SRC += uart.c
-SRC += resets.c
-SRC += testcase.c
-
+ASM 	:= start.s
+SRC 	:= init.c
+SRC 	+= gpio.c
+SRC 	+= uart.c
+SRC 	+= resets.c
+SRC 	+= testcase.c
 INC		:= $(wildcard *.h)
 OBJA	:= $(ASM:%.s=%.o)
 OBJC	:= $(SRC:%.c=%.o)
 
 
-
 all: $(TARGET).bin $(TARGET).list $(TARGET).uf2
 
 run: $(TARGET).bin $(TARGET).list $(TARGET).uf2
-	@echo " Running..."
-	@sudo mkdir -p /mnt/pico
-	@sudo mount /dev/sda1 /mnt/pico
-	@sudo cp prog.uf2 /mnt/pico
-	@sudo sync
-	@sudo umount /mnt/pico
+	@echo " Run..."
+	@./$(RUNSC)
 
 $(TARGET).uf2 : $(TARGET).bin
 	@echo " Create\t\t" $@
