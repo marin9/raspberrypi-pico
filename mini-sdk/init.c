@@ -3,6 +3,27 @@
 #include "uart.h"
 
 
+#define red(s)		gpio_set(2, (s))
+#define yellow(s)	gpio_set(3, (s))
+#define green(s)	gpio_set(4, (s))
+#define blue(s)		gpio_set(5, (s))
+
+static void leds_init() {
+	gpio_init(2, GPIO_FUNC_SIO);
+	gpio_init(3, GPIO_FUNC_SIO);
+	gpio_init(4, GPIO_FUNC_SIO);
+	gpio_init(5, GPIO_FUNC_SIO);
+	gpio_set_dir(2, 1);
+	gpio_set_dir(3, 1);
+	gpio_set_dir(4, 1);
+	gpio_set_dir(5, 1);
+	yellow(0);
+	green(0);
+	blue(0);
+	red(0);
+}
+
+
 void delay(int t) {
 	while (t--)
 		asm volatile ("nop");
@@ -31,8 +52,11 @@ void init() {
 	reset_release_wait(RESET_PADS_BANK0);
 	reset_release_wait(RESET_UART0);
 
-
+	leds_init();
 	uart_init();
+
+	red(1);
+	yellow(1);
 
 	gpio_init(0, GPIO_FUNC_UART);
 	gpio_init(1, GPIO_FUNC_UART);
