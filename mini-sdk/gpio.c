@@ -72,11 +72,11 @@ struct splock {
 
 void gpio_init(uint gpio, uint fn) {
 	io->gpio[gpio].ctrl = fn;
-	//pads->gpio[gpio] = (1 << 6) | (1 << 3); // input enable
+	pads->gpio[gpio] = (1 << 6); // input enable
 }
 
 void gpio_set_pull(uint gpio, uint up, uint down) {
-	uint reg = 0;
+	uint reg = pads->gpio[gpio];
 //TODO
 	if (down)
 		reg |= (1 << 2);
@@ -87,10 +87,12 @@ void gpio_set_pull(uint gpio, uint up, uint down) {
 }
 
 void gpio_set_dir(uint gpio, uint out) {
-	if (out)
+	if (out) {
 		sio->gpio_oe_set = 1 << gpio;
-	else
+	} else {
 		sio->gpio_oe_clr = 1 << gpio;
+		pads->gpio[gpio] = (1 << 6) | (1 << 7);
+	}
 }
 
 void gpio_set_dir_all(uint mask) {

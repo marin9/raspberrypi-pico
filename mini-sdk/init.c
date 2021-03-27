@@ -32,6 +32,22 @@ static void leds_init() {
 	red(0);
 }
 
+static void buttons_init() {
+	gpio_init(6, GPIO_FUNC_SIO);
+	gpio_init(7, GPIO_FUNC_SIO);
+	gpio_init(8, GPIO_FUNC_SIO);
+	gpio_init(9, GPIO_FUNC_SIO);
+	gpio_set_dir(6, 0);
+	gpio_set_dir(7, 0);
+	gpio_set_dir(8, 0);
+	gpio_set_dir(9, 0);
+
+	gpio_set_pull(6, 1, 0);
+	gpio_set_pull(7, 1, 0);
+	gpio_set_pull(8, 1, 0);
+	gpio_set_pull(9, 1, 0);
+}
+
 
 void delay(int t) {
 	while (t--)
@@ -67,7 +83,7 @@ void init() {
 	reset_release_wait(RESET_PADS_BANK0);
 	reset_release_wait(RESET_UART0);
 
-	leds_init();
+
 	uart_init();
 
 reg_wr(SYS_CSR, 4);
@@ -80,20 +96,21 @@ reg_wr(SYS_CSR, 7);
 
 asm volatile("cpsie i");
 
-/*
-while(1) {
-	asm volatile("wfe");
-}
-*/
-	red(1);
-	yellow(1);
+gpio_init(0, GPIO_FUNC_UART);
+gpio_init(1, GPIO_FUNC_UART);
 
-	gpio_init(0, GPIO_FUNC_UART);
-	gpio_init(1, GPIO_FUNC_UART);
-	gpio_init(25, GPIO_FUNC_SIO);
 
-	gpio_set_dir(25, 1);
-	gpio_set(25, 1);
+
+	leds_init();
+	buttons_init();
+	while(1) {
+		red(!gpio_get(6));
+		yellow(!gpio_get(7));
+		green(!gpio_get(8));
+		blue(!gpio_get(9));
+	}
+
+
 
 	while(1) {
 		uart_print(" B\r\n");
