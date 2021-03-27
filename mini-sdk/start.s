@@ -1,28 +1,54 @@
 .cpu cortex-m0
 .thumb
-.global vector_table
 vector_table:
-.thumb_func
         b reset
         .balign 4
+
         .word reset
-        .word loop
-        .word loop
+        .word nmi
+        .word hardfault
 
-        .word loop
-        .word loop
-        .word loop
-        .word loop
+        .word unused
+        .word unused
+        .word unused
+        .word unused
 
-        .word loop
-        .word loop
-        .word loop
-        .word loop
+        .word unused
+        .word unused
+        .word unused
+        .word svcall
 
-        .word loop
-        .word loop
-        .word loop
+        .word unused
+        .word unused
+        .word pendsv
         .word systick
+
+        .word irq0
+        .word irq1
+        .word irq2
+        .word irq3
+        .word irq4
+        .word irq5
+        .word irq6
+        .word irq7
+        .word irq8
+        .word irq9
+        .word irq10
+        .word irq11
+        .word irq12
+        .word irq13
+        .word irq14
+        .word irq15
+        .word irq16
+        .word irq17
+        .word irq18
+        .word irq19
+        .word irq20
+        .word irq21
+        .word irq22
+        .word irq23
+        .word irq24
+        .word irq25
 
 .thumb_func
 reset:
@@ -34,7 +60,8 @@ reset:
 	str r1, [r0]
 
 	bl init
-loop:
+
+unused:
 	b .
 
 

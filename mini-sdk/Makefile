@@ -11,6 +11,7 @@ RUNSC	= ../run.sh
 
 ASM 	:= start.s
 SRC 	:= init.c
+SRC	+= irq.c
 SRC 	+= gpio.c
 SRC 	+= uart.c
 SRC 	+= resets.c
