@@ -33,3 +33,22 @@
 #define MPU_RNR     (PPB_BASE + 0xED98)
 #define MPU_RBAR    (PPB_BASE + 0xED9C)
 #define MPU_RASR    (PPB_BASE + 0xEDA0)
+
+// Flags
+#define SYS_CSR_COUNTFLAG   (1 << 16)
+#define SYS_CSR_CLKSOURCE   (1 << 2)
+#define SYS_CSR_TICKINT     (1 << 1)
+#define SYS_CSR_ENABLE      (1 << 0)
+#define SYS_RVR_RELOAD      (0x00ffffff)
+#define SYS_CVR_CURRENT     (0x00ffffff)
+#define SYS_CALIB_NOREF     (1 << 31)
+#define SYS_CALIB_SKEW      (1 << 30)
+#define SYS_CALIB_TENMS     (0x00ffffff)
+
+#define AIRCR_SYSRESETREQ   (1 << 2)
+
+#define SCR_SEVONPEND       (1 << 4)
+#define SCR_SLEEPDEEP       (1 << 2)
+#define SCR_SLEEPONEXIT     (1 << 1)
+
+#define SHCSR_SVCALLPENDED  (1 << 15)
