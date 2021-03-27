@@ -2,6 +2,15 @@
 #include "gpio.h"
 #include "uart.h"
 
+#define SYS_CSR    (PPB_BASE + 0xE010)
+#define SYS_RVR    (PPB_BASE + 0xE014)
+#define SYS_CVR    (PPB_BASE + 0xE018)
+#define SYS_CALIB  (PPB_BASE + 0xE01C)
+#define NVIC_ISER   (PPB_BASE + 0xE100)
+#define NVIC_ICER   (PPB_BASE + 0xE180)
+#define NVIC_ISPR   (PPB_BASE + 0xE200)
+#define NVIC_ICPR   (PPB_BASE + 0xE280)
+
 
 #define red(s)		gpio_set(2, (s))
 #define yellow(s)	gpio_set(3, (s))
@@ -30,6 +39,12 @@ void delay(int t) {
 }
 
 
+void systick() {
+	uart_print("sys tick\r\n");
+	reg_rd(SYS_CSR);
+	//reg_wr(NVIC_ICPR, 1 << 15);
+}
+
 void init() {
 
 	reg_wr(CLOCKS_BASE+0x78, 0);
@@ -55,6 +70,21 @@ void init() {
 	leds_init();
 	uart_init();
 
+reg_wr(SYS_CSR, 4);
+reg_wr(SYS_RVR, 12000000-1);
+reg_wr(SYS_CVR, 12000000-1);
+reg_wr(SYS_CSR, 7);
+
+//reg_wr(NVIC_ICPR, 1 << 15);
+//reg_wr(NVIC_ISER, 1 << 0);
+
+asm volatile("cpsie i");
+
+/*
+while(1) {
+	asm volatile("wfe");
+}
+*/
 	red(1);
 	yellow(1);
 
@@ -66,8 +96,8 @@ void init() {
 	gpio_set(25, 1);
 
 	while(1) {
-		uart_print("OK\r\n");
-		//delay(10000);
+		uart_print(" B\r\n");
+		delay(1000000);
 	}
 
 }

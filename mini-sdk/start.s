@@ -1,9 +1,43 @@
 .cpu cortex-m0
 .thumb
+.global vector_table
+vector_table:
+.thumb_func
+        b reset
+        .balign 4
+        .word reset
+        .word loop
+        .word loop
+
+        .word loop
+        .word loop
+        .word loop
+        .word loop
+
+        .word loop
+        .word loop
+        .word loop
+        .word loop
+
+        .word loop
+        .word loop
+        .word loop
+        .word systick
+
+.thumb_func
+reset:
 	ldr r0, =0x20001000
 	mov sp, r0
+
+	ldr r0, =0xE000ED08
+	ldr r1, =vector_table
+	str r1, [r0]
+
 	bl init
+loop:
 	b .
+
+
 
 .align
 .ltorg
