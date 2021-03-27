@@ -91,8 +91,7 @@ reg_wr(SYS_RVR, 12000000-1);
 reg_wr(SYS_CVR, 12000000-1);
 reg_wr(SYS_CSR, 7);
 
-//reg_wr(NVIC_ICPR, 1 << 15);
-//reg_wr(NVIC_ISER, 1 << 0);
+reg_wr(NVIC_ISER, 1 << 13);
 
 asm volatile("cpsie i");
 
@@ -103,6 +102,9 @@ gpio_init(1, GPIO_FUNC_UART);
 
 	leds_init();
 	buttons_init();
+
+reg_wr(IO_BANK0_BASE+0x100, 1<<27);
+
 	while(1) {
 		red(!gpio_get(6));
 		yellow(!gpio_get(7));
