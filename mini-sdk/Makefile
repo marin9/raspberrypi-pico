@@ -3,33 +3,38 @@ XCPU	= -mcpu=cortex-m0
 AOPS	= --warn --fatal-warnings $(XCPU)
 COPS	= -Wall -Wextra -O2 -ffreestanding $(XCPU) -fpic -mthumb
 LOPS	= -nostdlib -nostartfiles
+UOPS	= #-f -n
 
+MKUF2	= mkuf2
 LINKER	= memory.ld
 TARGET	= picobin
-MKUF2	= ../mkuf2
-RUNSC	= ../run.sh
 
-ASM		:= $(wildcard src/*.s)
-SRC 	:= $(wildcard src/*.c)
-INC		:= $(wildcard inc/*.h)
-OBJA	:= $(ASM:src/%.s=obj/%.o)
-OBJC	:= $(SRC:src/%.c=obj/%.o)
+ASM		= $(wildcard src/*.s)
+SRC 	= $(wildcard src/*.c)
+INC		= $(wildcard inc/*.h)
+OBJA	= $(ASM:src/%.s=build/%.o)
+OBJC	= $(SRC:src/%.c=build/%.o)
 
 
-all: $(TARGET).bin $(TARGET).list $(TARGET).uf2
+all: build $(TARGET).bin $(TARGET).list $(TARGET).uf2
 
-run: $(TARGET).bin $(TARGET).list $(TARGET).uf2
+run: build $(TARGET).bin $(TARGET).list $(TARGET).uf2
 	@echo " Copy to MCU"
-	@./$(RUNSC)
+	@mkdir -p /mnt/pico
+	@sudo mount /dev/sdb1 /mnt/pico
+	@cp $(TARGET).uf2 /mnt/pico
+	@sync
+	@sudo umount /mnt/pico
 
 clean :
 		@echo " Clean"
-		@rm -f obj/*
+		@rm -rf build
 		@rm -f $(TARGET).*
+
 
 $(TARGET).uf2 : $(TARGET).bin
 	@echo " Create\t\t" $@
-	@./$(MKUF2) -i $< -o $@
+	@./$(MKUF2) -i $< -o $@ $(UOPS)
 
 $(TARGET).list: $(TARGET).elf
 	@echo " Create\t\t" $@
@@ -43,10 +48,14 @@ $(TARGET).elf : $(LINKER) $(OBJA) $(OBJC)
 	@echo " Create\t\t" $@
 	@$(ARMGNU)-ld $(LOPS) -T $(LINKER) $(OBJA) $(OBJC) -o $@
 
-$(OBJA): obj/%.o : src/%.s $(INC)
+$(OBJA): build/%.o : src/%.s $(INC)
 	@echo " Compile\t" $<
 	@$(ARMGNU)-as $(AOP) $< -o $@
 
-$(OBJC): obj/%.o : src/%.c $(INC)
+$(OBJC): build/%.o : src/%.c $(INC)
 	@echo " Compile\t" $<
 	@$(ARMGNU)-gcc $(COPS) -Iinc -c $< -o $@
+
+build:
+	@echo " Create\t\t" $@
+	@mkdir build

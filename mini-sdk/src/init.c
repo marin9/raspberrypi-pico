@@ -67,4 +67,25 @@ reg_wr(IO_BANK0_BASE+0x100, 1<<27);
 
 
 
+	gpio_init(18, GPIO_FUNC_SIO);
+	gpio_init(19, GPIO_FUNC_SIO);
+	gpio_init(20, GPIO_FUNC_SIO);
+	gpio_set_dir(18, 1);
+	gpio_set_dir(19, 1);
+	gpio_set_dir(20, 1);
+
+	while(1){
+		gpio_set(18, 0);
+		gpio_set(19, 1);
+		gpio_set(20, 1);
+		delay(1000000);
+		gpio_set(18, 1);
+		gpio_set(19, 0);
+		gpio_set(20, 1);
+		delay(1000000);
+		gpio_set(18, 1);
+		gpio_set(19, 1);
+		gpio_set(20, 0);
+		delay(1000000);
+	}
 }
