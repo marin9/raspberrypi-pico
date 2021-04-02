@@ -5,27 +5,27 @@ COPS	= -Wall -Wextra -O2 -ffreestanding $(XCPU) -fpic -mthumb
 LOPS	= -nostdlib -nostartfiles
 
 LINKER	= memory.ld
-TARGET	= prog
+TARGET	= picobin
 MKUF2	= ../mkuf2
 RUNSC	= ../run.sh
 
-ASM 	:= start.s
-SRC 	:= init.c
-SRC	+= irq.c
-SRC 	+= gpio.c
-SRC 	+= uart.c
-SRC 	+= resets.c
-SRC 	+= testcase.c
-INC		:= $(wildcard *.h)
-OBJA	:= $(ASM:%.s=%.o)
-OBJC	:= $(SRC:%.c=%.o)
+ASM		:= $(wildcard src/*.s)
+SRC 	:= $(wildcard src/*.c)
+INC		:= $(wildcard inc/*.h)
+OBJA	:= $(ASM:src/%.s=obj/%.o)
+OBJC	:= $(SRC:src/%.c=obj/%.o)
 
 
 all: $(TARGET).bin $(TARGET).list $(TARGET).uf2
 
 run: $(TARGET).bin $(TARGET).list $(TARGET).uf2
-	@echo " Run..."
+	@echo " Copy to MCU"
 	@./$(RUNSC)
+
+clean :
+		@echo " Clean"
+		@rm -f obj/*
+		@rm -f $(TARGET).*
 
 $(TARGET).uf2 : $(TARGET).bin
 	@echo " Create\t\t" $@
@@ -43,15 +43,10 @@ $(TARGET).elf : $(LINKER) $(OBJA) $(OBJC)
 	@echo " Create\t\t" $@
 	@$(ARMGNU)-ld $(LOPS) -T $(LINKER) $(OBJA) $(OBJC) -o $@
 
-$(OBJA): %.o : %.s $(INC)
+$(OBJA): obj/%.o : src/%.s $(INC)
 	@echo " Compile\t" $<
 	@$(ARMGNU)-as $(AOP) $< -o $@
 
-$(OBJC): %.o : %.c $(INC)
+$(OBJC): obj/%.o : src/%.c $(INC)
 	@echo " Compile\t" $<
-	@$(ARMGNU)-gcc $(COPS) -c $< -o $@
-
-clean :
-	@echo " Clean"
-	@rm -f *.o
-	@rm -f $(TARGET).*
+	@$(ARMGNU)-gcc $(COPS) -Iinc -c $< -o $@
