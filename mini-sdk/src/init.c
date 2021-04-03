@@ -2,6 +2,44 @@
 #include "gpio.h"
 #include "uart.h"
 
+void delay(int t) {
+	while (t--)
+		asm volatile ("nop");
+}
+
+void systick() {
+
+}
+
+
+void init() {
+	reset_release_wait(RESET_IO_BANK0);
+	reset_release_wait(RESET_PADS_BANK0);
+
+	gpio_init(18, GPIO_FUNC_SIO);
+	gpio_init(19, GPIO_FUNC_SIO);
+	gpio_init(20, GPIO_FUNC_SIO);
+	gpio_dir(18, 1);
+	gpio_dir(19, 1);
+	gpio_dir(20, 1);
+
+	gpio_init(0, GPIO_FUNC_SIO);
+	gpio_init(1, GPIO_FUNC_SIO);
+	gpio_init(2, GPIO_FUNC_SIO);
+	gpio_pullup(0, 1);
+	gpio_pullup(1, 1);
+	gpio_pullup(2, 1);
+
+	while(1){
+		gpio_set(18, gpio_get(0));
+		gpio_set(19, gpio_get(1));
+		gpio_set(20, gpio_get(2));
+	}
+}
+
+
+/*
+
 #define SYS_CSR    (PPB_BASE + 0xE010)
 #define SYS_RVR    (PPB_BASE + 0xE014)
 #define SYS_CVR    (PPB_BASE + 0xE018)
@@ -12,42 +50,28 @@
 #define NVIC_ICPR   (PPB_BASE + 0xE280)
 
 
-void delay(int t) {
-	while (t--)
-		asm volatile ("nop");
-}
+reg_wr(CLOCKS_BASE+0x78, 0);
 
+reg_wr(XOSC_BASE+0x00, 0xaa0);
+reg_wr(XOSC_BASE+0x0c, 47);
+reg_wr(XOSC_BASE+0x00+0x2000, 0xfab000);
 
-void systick() {
-	uart_print("M\r\n");
-	reg_rd(SYS_CSR);
-	//reg_wr(NVIC_ICPR, 1 << 15);
-}
-
-void init() {
-
-	reg_wr(CLOCKS_BASE+0x78, 0);
-
-	reg_wr(XOSC_BASE+0x00, 0xaa0);
-	reg_wr(XOSC_BASE+0x0c, 47);
-	reg_wr(XOSC_BASE+0x00+0x2000, 0xfab000);
-
-	while(1) {
-		if (((reg_rd(XOSC_BASE+0x04)) & 0x80000000)!=0){
-			break;
-		}
+while(1) {
+	if (((reg_rd(XOSC_BASE+0x04)) & 0x80000000)!=0){
+		break;
 	}
+}
 
-	reg_wr(CLOCKS_BASE+0x30, 2);
-	reg_wr(CLOCKS_BASE+0x3c, 0);
-	reg_wr(CLOCKS_BASE+0x48, 0x880);
+reg_wr(CLOCKS_BASE+0x30, 2);
+reg_wr(CLOCKS_BASE+0x3c, 0);
+reg_wr(CLOCKS_BASE+0x48, 0x880);
 
-	reset_release_wait(RESET_IO_BANK0);
-	reset_release_wait(RESET_PADS_BANK0);
-	reset_release_wait(RESET_UART0);
+reset_release_wait(RESET_IO_BANK0);
+reset_release_wait(RESET_PADS_BANK0);
+reset_release_wait(RESET_UART0);
 
 
-	uart_init();
+uart_init();
 
 reg_wr(SYS_CSR, 4);
 reg_wr(SYS_RVR, 12000000-1);
@@ -61,31 +85,4 @@ asm volatile("cpsie i");
 gpio_init(0, GPIO_FUNC_UART);
 gpio_init(1, GPIO_FUNC_UART);
 
-
-
-reg_wr(IO_BANK0_BASE+0x100, 1<<27);
-
-
-
-	gpio_init(18, GPIO_FUNC_SIO);
-	gpio_init(19, GPIO_FUNC_SIO);
-	gpio_init(20, GPIO_FUNC_SIO);
-	gpio_set_dir(18, 1);
-	gpio_set_dir(19, 1);
-	gpio_set_dir(20, 1);
-
-	while(1){
-		gpio_set(18, 0);
-		gpio_set(19, 1);
-		gpio_set(20, 1);
-		delay(1000000);
-		gpio_set(18, 1);
-		gpio_set(19, 0);
-		gpio_set(20, 1);
-		delay(1000000);
-		gpio_set(18, 1);
-		gpio_set(19, 1);
-		gpio_set(20, 0);
-		delay(1000000);
-	}
-}
+*/

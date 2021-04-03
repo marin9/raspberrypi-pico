@@ -1,5 +1,4 @@
 #pragma once
-#include "rp2040.h"
 
 #define IRQ_TIMER0      0
 #define IRQ_TIMER1      1
@@ -27,11 +26,3 @@
 #define IRQ_I2C0        23
 #define IRQ_I2C1        24
 #define IRQ_RTC         25
-
-
-void cpsie();
-void cpsid();
-void svc(uint n);
-void send_event();
-void wait_event();
-void wait_intr();

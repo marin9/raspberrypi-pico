@@ -1,6 +1,6 @@
 #include "gpio.h"
 
-
+/*
 // test led blink (25)
 void tc0() {
     uint dl;
@@ -78,3 +78,4 @@ void tc1() {
         while (dl--) asm volatile ("nop");
     }
 }
+*/
