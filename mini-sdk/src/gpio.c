@@ -51,10 +51,10 @@ struct pads_bank0_hw {
 #define io		((volatile struct io_bank0_hw*)IO_BANK0_BASE)
 #define pads 	((volatile struct pads_bank0_hw*)PADS_BANK0_BASE)
 
-#define IOBANK_INT_EDGE_HIGH		3
-#define IOBANK_INT_EDGE_LOW			2
-#define IOBANK_INT_LEVEL_HIGH		1
-#define IOBANK_INT_LEVEL_LOW		0
+#define IOBANK_INT_EDGE_HIGH		4
+#define IOBANK_INT_EDGE_LOW			3
+#define IOBANK_INT_LEVEL_HIGH		2
+#define IOBANK_INT_LEVEL_LOW		1
 #define IOBANK_CTRL_IRQOVER_HIGH	(3 << 28)
 #define IOBANK_CTRL_IRQOVER_LOW		(2 << 28)
 #define IOBANK_CTRL_IRQOVER_INV		(1 << 28)
@@ -150,8 +150,8 @@ void gpio_pulldown(uint gpio, uint enable) {
 	pads->gpio[gpio] = reg;
 }
 
-void gpio_irq_set(uint gpio, uint enable, uint event) {
-	gpio_irq_ack(gpio);
+void gpio_int_set(uint gpio, uint enable, uint event) {
+	gpio_int_ack(gpio);
 	if (enable) {
 		io->proc0_inte[gpio / 8] |= event << (4 *(gpio % 8));
 	} else {
@@ -159,6 +159,6 @@ void gpio_irq_set(uint gpio, uint enable, uint event) {
 	}
 }
 
-void gpio_irq_ack(uint gpio) {
+void gpio_int_ack(uint gpio) {
 	io->intr[gpio / 8] = 0xC << (4 * (gpio % 8));
 }

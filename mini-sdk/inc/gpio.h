@@ -13,10 +13,10 @@
 #define GPIO_FUNC_USB			9
 #define GPIO_FUNC_NULL			0xF
 
-#define GPIO_INT_LEVEL_LOW		0
-#define GPIO_INT_LEVEL_HIGH		1
-#define GPIO_INT_EDGE_FALL		2
-#define GPIO_INT_EDGE_RISE		3
+#define GPIO_INT_LEVEL_LOW		1
+#define GPIO_INT_LEVEL_HIGH		2
+#define GPIO_INT_EDGE_FALL		4
+#define GPIO_INT_EDGE_RISE		8
 
 
 void gpio_init(uint gpio, uint func);
@@ -28,5 +28,5 @@ void gpio_deinit(uint gpio);
 void gpio_pullup(uint gpio, uint enable);
 void gpio_pulldown(uint gpio, uint enable);
 
-void gpio_irq_set(uint gpio, uint enable, uint event);
-void gpio_irq_ack(uint gpio);
+void gpio_int_set(uint gpio, uint enable, uint event);
+void gpio_int_ack(uint gpio);

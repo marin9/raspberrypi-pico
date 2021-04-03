@@ -68,12 +68,12 @@ void irq11() {
 void irq12() {
 
 }
-
+/*
 void irq13() {
     uart_print("13\r\n");
     reg_wr(IO_BANK0_BASE + 0xf0, 1 << 27);
 }
-
+*/
 void irq14() {
 
 }

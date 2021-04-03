@@ -1,6 +1,7 @@
 #include "resets.h"
 #include "gpio.h"
 #include "uart.h"
+#include "nvic.h"
 
 void delay(int t) {
 	while (t--)
@@ -9,6 +10,13 @@ void delay(int t) {
 
 void systick() {
 
+}
+
+void irq13() {
+	gpio_set(20, 0);
+	delay(1000000);
+	gpio_set(20, 1);
+	gpio_int_ack(7);
 }
 
 
@@ -30,10 +38,19 @@ void init() {
 	gpio_pullup(1, 1);
 	gpio_pullup(2, 1);
 
+	gpio_init(7, GPIO_FUNC_SIO);
+	gpio_pullup(7, 1);
+	delay(10000);
+	gpio_int_set(7, 1, GPIO_INT_EDGE_FALL);
+	nvic_enable(13);
+
+	gpio_set(19, 1);
+	gpio_set(20, 1);
 	while(1){
-		gpio_set(18, gpio_get(0));
-		gpio_set(19, gpio_get(1));
-		gpio_set(20, gpio_get(2));
+		gpio_set(18, 0);
+		delay(100000);
+		gpio_set(18, 1);
+		delay(100000);
 	}
 }
 
