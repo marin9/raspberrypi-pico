@@ -67,6 +67,5 @@ typedef unsigned int uint;
 typedef unsigned short ushort;
 typedef unsigned char byte;
 
-
-#define reg_rd(addr)            *((volatile uint*)(addr))
-#define reg_wr(addr, data)      *((volatile uint*)(addr)) = (data)
+#define IO_RD(addr)            *((volatile uint*)(addr))
+#define IO_WR(addr, data)      *((volatile uint*)(addr)) = (data)

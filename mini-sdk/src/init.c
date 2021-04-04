@@ -8,10 +8,6 @@ void delay(int t) {
 		asm volatile ("nop");
 }
 
-void systick() {
-
-}
-
 void irq13() {
 	gpio_set(20, 0);
 	delay(1000000);
@@ -42,6 +38,8 @@ void init() {
 	gpio_pullup(7, 1);
 	delay(10000);
 	gpio_int_set(7, 1, GPIO_INT_EDGE_FALL);
+	nvic_init();
+	nvic_register_irq(13, irq13);
 	nvic_enable(13);
 
 	gpio_set(19, 1);
