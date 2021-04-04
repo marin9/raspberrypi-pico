@@ -2,6 +2,7 @@
 #include "gpio.h"
 #include "uart.h"
 #include "nvic.h"
+#include "xosc.h"
 
 void delay(int t) {
 	while (t--)
@@ -17,6 +18,7 @@ void irq13() {
 
 
 void init() {
+	xosc_init();
 	reset_release_wait(RESET_IO_BANK0);
 	reset_release_wait(RESET_PADS_BANK0);
 
