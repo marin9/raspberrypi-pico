@@ -23,12 +23,8 @@ void init() {
 	gpio_init(0, GPIO_FUNC_UART);
 	gpio_dir(0, 1);
 
-	char buff[16];
 	while(1){
-		//dec2str(buff, 53);
-		//uart_print(buff);
-		//uart_print("\r\n");
-		printf("Broj: %x, drugi: %x\r\n", 2, 53);
+		printf("%d, %d, %d, %d, %d\r\n", -2, 53, 0, 100, 123456789);
 	}
 }
 

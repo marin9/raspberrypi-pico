@@ -186,7 +186,7 @@ void dec2str(char *str, int n) {
 	}
 
 	while (d) {
-		t = n / d;
+		t = __aeabi_idiv(n, d);
 		str[i] = t + '0';
 
 		if (str[i] != '0')
@@ -195,8 +195,8 @@ void dec2str(char *str, int n) {
 		if (w)
 			++i;
 
-		n = n % d;
-		d = d / 10;
+		n = __aeabi_idivmod(n, d);
+		d = __aeabi_idiv(d, 10);
 	}
 
 	if (i == 0) {

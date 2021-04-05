@@ -58,3 +58,6 @@ int isupper(int c);
 int isxdigit(int c);
 int tolower(int c);
 int toupper(int c);
+
+int __aeabi_idiv(int a, int b);
+int __aeabi_idivmod(int a, int b);
