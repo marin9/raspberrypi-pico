@@ -3,6 +3,7 @@
 #include "uart.h"
 #include "nvic.h"
 #include "xosc.h"
+#include "lib.h"
 
 void delay(int t) {
 	while (t--)
@@ -22,9 +23,12 @@ void init() {
 	gpio_init(0, GPIO_FUNC_UART);
 	gpio_dir(0, 1);
 
+	char buff[16];
 	while(1){
-		uart_hex(0x55A1FF07);
-		uart_print("\r\n");
+		//dec2str(buff, 53);
+		//uart_print(buff);
+		//uart_print("\r\n");
+		printf("Broj: %x, drugi: %x\r\n", 2, 53);
 	}
 }
 

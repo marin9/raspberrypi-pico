@@ -12,6 +12,39 @@ reset:
 .balign 0x100
 
 
+.text
+.align 4
+.force_thumb
+.global __aeabi_idiv
+__aeabi_idiv:
+	ldr r3, =0xD0000000
+	str r0, [r3, #0x68]
+	str r1, [r3, #0x6C]
+	b 1f
+1:	b 1f
+1:	b 1f
+1:	b 1f
+1:
+	ldr r0, [r3, #0x70]
+	bx lr
+
+.text
+.align 4
+.force_thumb
+.global __aeabi_idivmod
+__aeabi_idivmod:
+	ldr r3, =0xD0000000
+	str r0, [r3, #0x68]
+	str r1, [r3, #0x6C]
+	b 1f
+1:	b 1f
+1:	b 1f
+1:	b 1f
+1:
+	ldr r0, [r3, #0x74]
+	bx lr
+
+
 
 .text
 .align 0

@@ -17,7 +17,7 @@
 #define VTOR 		(PPB_BASE + 0xED08)
 #define AICR 		(PPB_BASE + 0xED0C)
 
-extern char reset; // TODO check
+extern uint reset;
 static uint __attribute__((aligned(256))) vector_table[16 + IRQ_COUNT];
 
 
@@ -48,7 +48,7 @@ void nvic_init() {
 	for (i = 0; i < (16 + IRQ_COUNT); ++i)
 		vector_table[i] = 0;
 
-	vector_table[1] = reset;
+	vector_table[1] = (uint)&reset;
 	vector_table[2] = (uint)nmi_handler;
 	vector_table[3] = (uint)hardfault_handler;
 	vector_table[11] = (uint)svccall_handler;
