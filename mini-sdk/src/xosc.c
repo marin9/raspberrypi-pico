@@ -25,7 +25,7 @@ struct xosc_hw {
 
 void xosc_init() {
 	xosc->ctrl = CTRL_FREQ_1_15_MHZ;
-	xosc->startup = (((12 * 1000000)/1000)+128)/256;
+	xosc->startup = (((12 * 1000000)/1000)+128)/256; // wait 1 ms
 	xosc->ctrl |= CTRL_ENABLE;
 	while (!(xosc->status & STATUS_STABLE));
 }

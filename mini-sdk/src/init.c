@@ -9,48 +9,22 @@ void delay(int t) {
 		asm volatile ("nop");
 }
 
-void irq13() {
-	gpio_set(20, 0);
-	delay(1000000);
-	gpio_set(20, 1);
-	gpio_int_ack(7);
-}
-
 
 void init() {
 	xosc_init();
+	IO_WR(CLOCKS_BASE+0x48, 0x880); // clk_peri enble
+
 	reset_release_wait(RESET_IO_BANK0);
 	reset_release_wait(RESET_PADS_BANK0);
+	reset_release_wait(RESET_UART0);
 
-	gpio_init(18, GPIO_FUNC_SIO);
-	gpio_init(19, GPIO_FUNC_SIO);
-	gpio_init(20, GPIO_FUNC_SIO);
-	gpio_dir(18, 1);
-	gpio_dir(19, 1);
-	gpio_dir(20, 1);
+	uart_init();
+	gpio_init(0, GPIO_FUNC_UART);
+	gpio_dir(0, 1);
 
-	gpio_init(0, GPIO_FUNC_SIO);
-	gpio_init(1, GPIO_FUNC_SIO);
-	gpio_init(2, GPIO_FUNC_SIO);
-	gpio_pullup(0, 1);
-	gpio_pullup(1, 1);
-	gpio_pullup(2, 1);
-
-	gpio_init(7, GPIO_FUNC_SIO);
-	gpio_pullup(7, 1);
-	delay(10000);
-	gpio_int_set(7, 1, GPIO_INT_EDGE_FALL);
-	nvic_init();
-	nvic_register_irq(13, irq13);
-	nvic_enable(13);
-
-	gpio_set(19, 1);
-	gpio_set(20, 1);
 	while(1){
-		gpio_set(18, 0);
-		delay(100000);
-		gpio_set(18, 1);
-		delay(100000);
+		uart_hex(0x55A1FF07);
+		uart_print("\r\n");
 	}
 }
 
@@ -103,3 +77,42 @@ gpio_init(0, GPIO_FUNC_UART);
 gpio_init(1, GPIO_FUNC_UART);
 
 */
+
+
+/*
+gpio irq
+
+
+void irq13() {
+	gpio_set(20, 0);
+	delay(1000000);
+	gpio_set(20, 1);
+	gpio_int_ack(7);
+}
+
+
+	gpio_init(18, GPIO_FUNC_SIO);
+	gpio_init(19, GPIO_FUNC_SIO);
+	gpio_init(20, GPIO_FUNC_SIO);
+	gpio_dir(18, 1);
+	gpio_dir(19, 1);
+	gpio_dir(20, 1);
+
+	gpio_init(0, GPIO_FUNC_SIO);
+	gpio_init(1, GPIO_FUNC_SIO);
+	gpio_init(2, GPIO_FUNC_SIO);
+	gpio_pullup(0, 1);
+	gpio_pullup(1, 1);
+	gpio_pullup(2, 1);
+
+	gpio_init(7, GPIO_FUNC_SIO);
+	gpio_pullup(7, 1);
+	delay(10000);
+	gpio_int_set(7, 1, GPIO_INT_EDGE_FALL);
+	nvic_init();
+	nvic_register_irq(13, irq13);
+	nvic_enable(13);
+
+	gpio_set(19, 1);
+	gpio_set(20, 1);
+	*/

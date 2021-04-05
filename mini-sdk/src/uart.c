@@ -34,3 +34,16 @@ void uart_print(char *s) {
         ++s;
     }
 }
+
+void uart_hex(uint x) {
+	uint i, tmp;
+	char buff[8 + 1];
+
+	buff[8] = 0;
+	for (i = 0; i < 8; ++i) {
+		tmp = x & 0xF;
+		buff[7 - i] = tmp < 10 ? tmp + '0' : tmp - 10 + 'A';
+		x = x >> 4;
+	}
+	uart_print(buff);
+}
