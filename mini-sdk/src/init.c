@@ -10,6 +10,13 @@ void delay(int t) {
 		asm volatile ("nop");
 }
 
+void handler() {
+	char buff[32];
+	memset(buff, 0, 32);
+	uart_read(0, buff, 32);
+	printf("UART RX: %s\r\n", buff);
+}
+
 
 void init() {
 	xosc_init();
@@ -19,12 +26,20 @@ void init() {
 	reset_release_wait(RESET_PADS_BANK0);
 	reset_release_wait(RESET_UART0);
 
-	uart_init();
+	uart_init(0, 115200);
 	gpio_init(0, GPIO_FUNC_UART);
+	gpio_init(1, GPIO_FUNC_UART);
 	gpio_dir(0, 1);
+
+	nvic_init();
+	nvic_register_irq(IRQ_UART0, handler);
+	nvic_enable(IRQ_UART0);
+
+	uart_intr_enable(0, 1, 0);
 
 	while(1){
 		printf("%d, %d, %d, %d, %d\r\n", -2, 53, 0, 100, 123456789);
+		delay(500000);
 	}
 }
 

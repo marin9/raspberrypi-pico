@@ -285,6 +285,6 @@ int printf(char *format, ...) {
 	int len;
 	char buff[128];
 	len = vssprintf(buff, &format);
-	uart_print(buff);
+	uart_write(0, buff, len);
 	return len;
 }
