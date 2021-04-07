@@ -9,5 +9,10 @@ void gpio_set(uint gpio, uint value);
 uint gpio_get(uint gpio);
 ```
 
+Usage:
+
+- make
+- copy picobin.uf2 to rpi-pico
+
 
 
