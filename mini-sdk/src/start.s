@@ -4,6 +4,13 @@
 reset:
 	ldr r0, =0x20001000
 	mov sp, r0
+
+	mov r0, #2
+	msr control, r0
+
+	ldr r0, =0x20002000
+	mov sp, r0
+
 	bl init
 	b .
 

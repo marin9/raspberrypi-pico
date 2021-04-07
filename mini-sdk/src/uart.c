@@ -98,6 +98,8 @@ void uart_init(uint id, uint baudrate) {
 	uart->ibrd = 6;
 	uart->fbrd = 33;
 	uart->lcr_h = LCR_WLEN_8 | LCR_FEN;
+	uart->imsc = 0;
+	uart->icr = 0xFFFFFFFF;
 	uart->cr = CR_TXE | CR_RXE | CR_UARTEN;
 }
 
@@ -144,6 +146,8 @@ void uart_intr_enable(uint id, uint rx, uint tx) {
 		uart = uart0;
 	else
 		uart = uart1;
+
+	uart->icr = 0xFFFFFFFF;
 
 	if (rx)
 		uart->imsc |= IMSC_RT;
