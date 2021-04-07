@@ -4,6 +4,8 @@
 #include "nvic.h"
 #include "xosc.h"
 #include "lib.h"
+#include "systick.h"
+
 
 void delay(int t) {
 	while (t--)
@@ -72,9 +74,9 @@ void init() {
 	printf("nvic enable uart0\r\n");
 	nvic_enable(IRQ_UART0);
 
-	delay(100000);
-	asm volatile ("mov r0, #3");
-	asm volatile ("msr control, r0");
+	systick_init();
+	systick_set(12000000-1);
+	//systick_init(1);
 
 	count = 0;
 	while(1){
