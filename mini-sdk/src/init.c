@@ -12,43 +12,12 @@ void delay(int t) {
 		asm volatile ("nop");
 }
 
-uint psr() {
-	asm volatile ("mrs r0, psr");
-	asm volatile ("bx lr");
-	return 0;
-}
-
-uint primask() {
-	asm volatile ("mrs r0, primask");
-	asm volatile ("bx lr");
-	return 0;
-}
-
-uint control() {
-	asm volatile ("mrs r0, control");
-	asm volatile ("bx lr");
-	return 0;
-}
-
-int count;
 
 void handler() {
 	char buff[32];
 	memset(buff, 0, 32);
 	uart_read(0, buff, 32);
 	printf("UART RX: %s\r\n", buff);
-
-	asm volatile ("cpsid i");
-	printf("PSR: \t\t%x\r\n", psr());
-	printf("PRIMASK: \t%x\r\n", primask());
-	printf("CONTROL: \t%x\r\n\r\n", control());
-	asm volatile ("cpsie i");
-
-	++count;
-	if (count > 2){
-		asm volatile ("mov r0, #2");
-		asm volatile ("msr control, r0");
-	}
 }
 
 
@@ -61,28 +30,21 @@ void init() {
 	reset_release_wait(RESET_PADS_BANK0);
 	reset_release_wait(RESET_UART0);
 
-	//printf("uart init\r\n");
 	uart_init(0, 115200);
 	gpio_init(0, GPIO_FUNC_UART);
 	gpio_init(1, GPIO_FUNC_UART);
 	gpio_dir(0, 1);
 
-	printf("nvic init\r\n");
 	nvic_init();
-	nvic_register_irq(IRQ_UART0, handler);
 	uart_intr_enable(0, 1, 0);
-	printf("nvic enable uart0\r\n");
+	nvic_register_irq(IRQ_UART0, handler);
 	nvic_enable(IRQ_UART0);
 
 	systick_init();
 	systick_set(12000000-1);
-	//systick_init(1);
 
-	count = 0;
 	while(1){
-		printf("PSR: \t\t%x\r\n", psr());
-		printf("PRIMASK: \t%x\r\n", primask());
-		printf("CONTROL: \t%x\r\n\r\n", control());
+		printf("M\r\n");
 		delay(5000000);
 	}
 }

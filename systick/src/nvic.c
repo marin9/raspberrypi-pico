@@ -1,5 +1,5 @@
 #include "nvic.h"
-#include "lib.h"
+#include "gpio.h"
 
 #define NVIC_ISER   (PPB_BASE + 0xE100)
 #define NVIC_ICER   (PPB_BASE + 0xE180)
@@ -32,7 +32,6 @@ static void hardfault_handler() {
 
 static void svccall_handler() {
 
-
 }
 
 static void pendsv_handler() {
@@ -40,7 +39,7 @@ static void pendsv_handler() {
 }
 
 static void systick_handler() {
-	printf("systick\r\n");
+	IO_WR(SIO_BASE + 0x1C, 1 << 19); // toggle pin 19
 }
 
 
