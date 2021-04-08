@@ -1,4 +1,4 @@
-# GPIO basic
+GPIO basic
 
 ```
 void gpio_init(uint gpio, uint func);
