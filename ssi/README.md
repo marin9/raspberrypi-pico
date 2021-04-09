@@ -1,0 +1,1 @@
+SSI read from flash
