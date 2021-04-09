@@ -1,1 +1,1 @@
-XIP
+Bootloader, XIP
