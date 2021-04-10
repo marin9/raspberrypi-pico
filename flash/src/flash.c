@@ -3,9 +3,11 @@
 
 #define CMD_WRITE	0x02
 #define CMD_READ	0x03
+#define CMD_RDSR	0x05
 #define CMD_WREN	0x06
 #define CMD_ERASE	0x20
 
+#define SECTOR_SIZE	4096
 
 #define SSI_START	IO_WR(0x40018000 + 0x0c, (2 << 8)); // CS = 0
 #define SSI_END		IO_WR(0x40018000 + 0x0c, (3 << 8)); // CS = 1
@@ -24,8 +26,18 @@ static void ssi_read_write(char *data, uint len) {
 	}
 }
 
+static void flash_write_enable() {
+	char cmd = CMD_WREN;
 
-static void delay(int t) {
+	while (flash_busy());
+
+	SSI_START
+	ssi_read_write(&cmd, 1);
+	SSI_END
+}
+
+
+void delay(uint t) {
 	while (t--)
 		asm volatile ("nop");
 }
@@ -55,32 +67,18 @@ void flash_init() {
 }
 
 void flash_sector_read(uint addr, char *d) {
-	int i;
 	char cmd_rd[4];
-
-	cmd_rd[0] = 0x03;
+	cmd_rd[0] = CMD_READ;
 	cmd_rd[1] = (addr >> 16) & 0xff;
 	cmd_rd[2] = (addr >> 8) & 0xff;
 	cmd_rd[3] = (addr >> 0) & 0xff;
 
-	IO_WR(0x40018000 + 0x0c, (2 << 8)); //cs = 0
+	//while (flash_busy());
 
-	for (i = 0; i < 4; ++i) {
-		IO_WR(0x18000060, cmd_rd[i]);
-	}
-	while (!(IO_RD(0x18000028) & (1 << 2)));
-	while (IO_RD(0x18000028) & (1 << 0));
-
-	for (i = 0; i < 4; ++i)
-		IO_RD(0x18000060);
-
-	for (i = 0; i < 32; ++i) {
-		IO_WR(0x18000060, 0);
-		while (!(IO_RD(0x18000028) & (1 << 2)));
-		while (IO_RD(0x18000028) & (1 << 0));
-		d[i] = IO_RD(0x18000060);
-	}
-	IO_WR(0x40018000 + 0x0c, (3 << 8)); // cs = 1
+	SSI_START
+	ssi_read_write(cmd_rd, 4);
+	ssi_read_write(d, SECTOR_SIZE);
+	SSI_END
 }
 
 void flash_sector_write(uint addr, char *d) {
@@ -151,4 +149,15 @@ void flash_sector_erase(uint addr) {
 
 	IO_WR(0x40018000 + 0x0c, (3 << 8)); // cs = 1
 	delay(500000);
+}
+
+uint flash_busy() {
+	char cmd[2];
+	cmd[0] = CMD_RDSR;
+
+	SSI_START
+	ssi_read_write(cmd, 2);
+	SSI_END
+
+	return cmd[1] & 1;
 }

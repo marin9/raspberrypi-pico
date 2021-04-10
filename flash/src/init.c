@@ -3,16 +3,12 @@
 #include "uart.h"
 #include "flash.h"
 
-
-void delay(int t) {
-	while (t--)
-		asm volatile ("nop");
-}
-
-static char buff[4096];
+static char rbuff[4096];
+static char wbuff[4096];
 
 
 void init() {
+	int i;
 	IO_WR(CLOCKS_BASE + 0x48, 0x880); 		// Enable clk_peri
 	reset_release_wait(RESET_IO_BANK0);
 	reset_release_wait(RESET_PADS_BANK0);
@@ -23,17 +19,24 @@ void init() {
 	gpio_init(1, GPIO_FUNC_UART);
 	gpio_dir(0, 1);
 
-	flash_init();
-	//flash_sector_write(0, "0123456789abcdefghijklmno");
-	flash_sector_write(0, "ABCDEFGHIJKLMNO0123456789");
-	flash_sector_read(0, buff);
+	for (i = 0; i < 16; ++i) {
+		wbuff[i] = '0' + i;
+	}
 
-	int i;
-	uart_print("flash read:\r\n");
+	flash_init();
+
+	uart_print("FLASH write\r\n");
+	flash_sector_write(0, wbuff);
+
+	uart_print("FLASH read\r\n");
+	flash_sector_read(0, rbuff);
+
+	uart_print("FLASH print:\r\n");
 	for (i = 0; i < 32; ++i) {
-		uart_hexb(buff[i]);
+		uart_hexb(rbuff[i]);
 		uart_print("\r\n");
 	}
+
 	uart_print("\r\n");
 	while (1);
 }

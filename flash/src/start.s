@@ -1,6 +1,6 @@
 .cpu cortex-m0
 .thumb
-	ldr r0, =0x20002000
+	ldr r0, =0x20010000
 	mov sp, r0
 
 	bl init
