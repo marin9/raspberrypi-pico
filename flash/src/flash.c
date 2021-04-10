@@ -1,4 +1,5 @@
 #include "flash.h"
+#include "resets.h"
 
 static void delay(int t) {
 	while (t--)
@@ -6,6 +7,9 @@ static void delay(int t) {
 }
 
 void flash_init() {
+	reset_release_wait(RESET_IO_QSPI);
+	reset_release_wait(RESET_PADS_QSPI);
+
 	// IO_QSPI <= FUNC0 (XIP)
 	IO_WR(IO_QSPI_BASE + 0x04, 0);
 	IO_WR(IO_QSPI_BASE + 0x0C, (3 << 8)); // OUTOVER <= high
@@ -15,19 +19,15 @@ void flash_init() {
 	IO_WR(IO_QSPI_BASE + 0x2C, (3 << 8)); // OUTOVER <= high
 
 	// PADS_QSPI
-	IO_WR(PADS_QSPI_BASE + 0x08, (3 << 4)); // 12 mA
 	IO_WR(PADS_QSPI_BASE + 0x0C, ((1 << 6) | (1 << 2))); // input enable, pulldown
-	delay(50000);
 
 	// SSI init
 	IO_WR(0x18000008, 0);
 	IO_WR(0x18000014, 8);
 	IO_WR(0x18000000, (7 << 16));
 	IO_WR(0x180000f4, 0x00000218);
-	IO_WR(0x18000004, 0);
 	IO_WR(0x18000010, 1);
 	IO_WR(0x18000008, 1);
-	delay(500000);
 }
 
 void flash_sector_read(uint addr, char *d) {
@@ -44,17 +44,18 @@ void flash_sector_read(uint addr, char *d) {
 	for (i = 0; i < 4; ++i) {
 		IO_WR(0x18000060, cmd_rd[i]);
 	}
-	delay(10000);
+	while (!(IO_RD(0x18000028) & (1 << 2)));
+	while (IO_RD(0x18000028) & (1 << 0));
 
 	for (i = 0; i < 4; ++i)
 		IO_RD(0x18000060);
 
 	for (i = 0; i < 32; ++i) {
 		IO_WR(0x18000060, 0);
-		delay(10000);
+		while (!(IO_RD(0x18000028) & (1 << 2)));
+		while (IO_RD(0x18000028) & (1 << 0));
 		d[i] = IO_RD(0x18000060);
 	}
-
 	IO_WR(0x40018000 + 0x0c, (3 << 8)); // cs = 1
 }
 
@@ -62,33 +63,13 @@ void flash_sector_write(uint addr, char *d) {
 	int i;
 	char cmd_wr[4];
 
-	// write enable
-	IO_WR(0x40018000 + 0x0c, (2 << 8)); //cs = 0
-	IO_WR(0x18000060, 0x06);
-	delay(10000);
-	IO_RD(0x18000060);
-	IO_WR(0x40018000 + 0x0c, (3 << 8)); // cs = 1
-	delay(30000);
-
-	// erase
-	cmd_wr[0] = 0x20;
-	cmd_wr[1] = (addr >> 16) & 0xff;
-	cmd_wr[2] = (addr >> 8) & 0xff;
-	cmd_wr[3] = (addr >> 0) & 0xff;
-	IO_WR(0x40018000 + 0x0c, (2 << 8)); //cs = 0
-	for (i = 0; i < 4; ++i) {
-		IO_WR(0x18000060, cmd_wr[i]);
-	}
-	delay(10000);
-	for (i = 0; i < 4; ++i)
-		IO_RD(0x18000060);
-	IO_WR(0x40018000 + 0x0c, (3 << 8)); // cs = 1
-	delay(500000);
+	flash_sector_erase(addr);
 
 	// write enable
 	IO_WR(0x40018000 + 0x0c, (2 << 8)); //cs = 0
 	IO_WR(0x18000060, 0x06);
-	delay(10000);
+	while (!(IO_RD(0x18000028) & (1 << 2)));
+	while (IO_RD(0x18000028) & (1 << 0));
 	IO_RD(0x18000060);
 	IO_WR(0x40018000 + 0x0c, (3 << 8)); // cs = 1
 	delay(10000);
@@ -101,15 +82,49 @@ void flash_sector_write(uint addr, char *d) {
 	IO_WR(0x40018000 + 0x0c, (2 << 8)); //cs = 0
 	for (i = 0; i < 4; ++i) {
 		IO_WR(0x18000060, cmd_wr[i]);
-		delay(10000);
+		while (!(IO_RD(0x18000028) & (1 << 2)));
+		while (IO_RD(0x18000028) & (1 << 0));
 		IO_RD(0x18000060);
 	}
 
 	for (i = 0; i < 32; ++i) {
 		IO_WR(0x18000060, d[i]);
-		delay(10000);
+		while (!(IO_RD(0x18000028) & (1 << 2)));
+		while (IO_RD(0x18000028) & (1 << 0));
 		IO_RD(0x18000060);
 	}
 	IO_WR(0x40018000 + 0x0c, (3 << 8)); // cs = 1
 	delay(300000);
+}
+
+void flash_sector_erase(uint addr) {
+	int i;
+	char cmd_wr[4];
+
+	// write enable
+	IO_WR(0x40018000 + 0x0c, (2 << 8)); //cs = 0
+	IO_WR(0x18000060, 0x06);
+	while (!(IO_RD(0x18000028) & (1 << 2)));
+	while (IO_RD(0x18000028) & (1 << 0));
+	IO_RD(0x18000060);
+	IO_WR(0x40018000 + 0x0c, (3 << 8)); // cs = 1
+	delay(30000);
+
+	// erase
+	cmd_wr[0] = 0x20;
+	cmd_wr[1] = (addr >> 16) & 0xff;
+	cmd_wr[2] = (addr >> 8) & 0xff;
+	cmd_wr[3] = (addr >> 0) & 0xff;
+
+	IO_WR(0x40018000 + 0x0c, (2 << 8)); //cs = 0
+	for (i = 0; i < 4; ++i) {
+		IO_WR(0x18000060, cmd_wr[i]);
+	}
+	while (!(IO_RD(0x18000028) & (1 << 2)));
+	while (IO_RD(0x18000028) & (1 << 0));
+	for (i = 0; i < 4; ++i)
+		IO_RD(0x18000060);
+
+	IO_WR(0x40018000 + 0x0c, (3 << 8)); // cs = 1
+	delay(500000);
 }
