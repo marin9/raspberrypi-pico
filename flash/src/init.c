@@ -20,7 +20,7 @@ void init() {
 	gpio_dir(0, 1);
 
 	for (i = 0; i < 16; ++i) {
-		wbuff[i] = 'a' + i;
+		wbuff[i] = 'A' + i;
 	}
 
 	flash_init();

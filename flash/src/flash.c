@@ -7,6 +7,7 @@
 #define CMD_WREN	0x06
 #define CMD_ERASE	0x20
 
+#define PAGE_SIZE	256
 #define SECTOR_SIZE	4096
 
 #define SSI_START	IO_WR(0x40018000 + 0x0c, (2 << 8)); // CS = 0
@@ -36,11 +37,22 @@ static void flash_write_enable() {
 	SSI_END
 }
 
+static void flash_page_write(uint addr, char *d) {
+	char cmd_wr[4];
+	cmd_wr[0] = CMD_WRITE;
+	cmd_wr[1] = (addr >> 16) & 0xff;
+	cmd_wr[2] = (addr >> 8) & 0xff;
+	cmd_wr[3] = (addr >> 0) & 0xff;
 
-void delay(uint t) {
-	while (t--)
-		asm volatile ("nop");
+	flash_write_enable();
+	while (flash_busy());
+
+	SSI_START
+	ssi_read_write(cmd_wr, 4);
+	ssi_read_write(d, PAGE_SIZE);
+	SSI_END
 }
+
 
 void flash_init() {
 	reset_release_wait(RESET_IO_QSPI);
@@ -82,22 +94,13 @@ void flash_sector_read(uint addr, char *d) {
 }
 
 void flash_sector_write(uint addr, char *d) {
-	char cmd_wr[4];
-	cmd_wr[0] = CMD_WRITE;
-	cmd_wr[1] = (addr >> 16) & 0xff;
-	cmd_wr[2] = (addr >> 8) & 0xff;
-	cmd_wr[3] = (addr >> 0) & 0xff;
+	uint i;
+	uint offset = 0;
 
-	flash_sector_erase(addr);
-	flash_write_enable();
-	while (flash_busy());
-
-	// write
-
-	SSI_START
-	ssi_read_write(cmd_wr, 4);
-	ssi_read_write(d, 32); //TODO max 256 ?
-	SSI_END
+	for (i = 0; i < 16; ++i) {
+		flash_page_write(addr + offset, d + offset);
+		offset += PAGE_SIZE;
+	}
 }
 
 void flash_sector_erase(uint addr) {
