@@ -73,7 +73,7 @@ void flash_sector_read(uint addr, char *d) {
 	cmd_rd[2] = (addr >> 8) & 0xff;
 	cmd_rd[3] = (addr >> 0) & 0xff;
 
-	//while (flash_busy());
+	while (flash_busy());
 
 	SSI_START
 	ssi_read_write(cmd_rd, 4);
@@ -82,73 +82,37 @@ void flash_sector_read(uint addr, char *d) {
 }
 
 void flash_sector_write(uint addr, char *d) {
-	int i;
 	char cmd_wr[4];
-
-	flash_sector_erase(addr);
-
-	// write enable
-	IO_WR(0x40018000 + 0x0c, (2 << 8)); //cs = 0
-	IO_WR(0x18000060, 0x06);
-	while (!(IO_RD(0x18000028) & (1 << 2)));
-	while (IO_RD(0x18000028) & (1 << 0));
-	IO_RD(0x18000060);
-	IO_WR(0x40018000 + 0x0c, (3 << 8)); // cs = 1
-	delay(10000);
-
-	// write
-	cmd_wr[0] = 0x02;
+	cmd_wr[0] = CMD_WRITE;
 	cmd_wr[1] = (addr >> 16) & 0xff;
 	cmd_wr[2] = (addr >> 8) & 0xff;
 	cmd_wr[3] = (addr >> 0) & 0xff;
-	IO_WR(0x40018000 + 0x0c, (2 << 8)); //cs = 0
-	for (i = 0; i < 4; ++i) {
-		IO_WR(0x18000060, cmd_wr[i]);
-		while (!(IO_RD(0x18000028) & (1 << 2)));
-		while (IO_RD(0x18000028) & (1 << 0));
-		IO_RD(0x18000060);
-	}
 
-	for (i = 0; i < 32; ++i) {
-		IO_WR(0x18000060, d[i]);
-		while (!(IO_RD(0x18000028) & (1 << 2)));
-		while (IO_RD(0x18000028) & (1 << 0));
-		IO_RD(0x18000060);
-	}
-	IO_WR(0x40018000 + 0x0c, (3 << 8)); // cs = 1
-	delay(300000);
+	flash_sector_erase(addr);
+	flash_write_enable();
+	while (flash_busy());
+
+	// write
+
+	SSI_START
+	ssi_read_write(cmd_wr, 4);
+	ssi_read_write(d, 32); //TODO max 256 ?
+	SSI_END
 }
 
 void flash_sector_erase(uint addr) {
-	int i;
 	char cmd_wr[4];
-
-	// write enable
-	IO_WR(0x40018000 + 0x0c, (2 << 8)); //cs = 0
-	IO_WR(0x18000060, 0x06);
-	while (!(IO_RD(0x18000028) & (1 << 2)));
-	while (IO_RD(0x18000028) & (1 << 0));
-	IO_RD(0x18000060);
-	IO_WR(0x40018000 + 0x0c, (3 << 8)); // cs = 1
-	delay(30000);
-
-	// erase
-	cmd_wr[0] = 0x20;
+	cmd_wr[0] = CMD_ERASE;
 	cmd_wr[1] = (addr >> 16) & 0xff;
 	cmd_wr[2] = (addr >> 8) & 0xff;
 	cmd_wr[3] = (addr >> 0) & 0xff;
 
-	IO_WR(0x40018000 + 0x0c, (2 << 8)); //cs = 0
-	for (i = 0; i < 4; ++i) {
-		IO_WR(0x18000060, cmd_wr[i]);
-	}
-	while (!(IO_RD(0x18000028) & (1 << 2)));
-	while (IO_RD(0x18000028) & (1 << 0));
-	for (i = 0; i < 4; ++i)
-		IO_RD(0x18000060);
+	flash_write_enable();
+	while (flash_busy());
 
-	IO_WR(0x40018000 + 0x0c, (3 << 8)); // cs = 1
-	delay(500000);
+	SSI_START
+	ssi_read_write(cmd_wr, 4);
+	SSI_END
 }
 
 uint flash_busy() {
