@@ -24,8 +24,8 @@ void init() {
 	gpio_dir(0, 1);
 
 	flash_init();
-	flash_sector_write(0, "0123456789abcdefghijklmno");
-	//flash_sector_write(0, "ABCDEFGHIJKLMNO0123456789");
+	//flash_sector_write(0, "0123456789abcdefghijklmno");
+	flash_sector_write(0, "ABCDEFGHIJKLMNO0123456789");
 	flash_sector_read(0, buff);
 
 	int i;

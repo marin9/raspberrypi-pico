@@ -1,6 +1,30 @@
 #include "flash.h"
 #include "resets.h"
 
+#define CMD_WRITE	0x02
+#define CMD_READ	0x03
+#define CMD_WREN	0x06
+#define CMD_ERASE	0x20
+
+
+#define SSI_START	IO_WR(0x40018000 + 0x0c, (2 << 8)); // CS = 0
+#define SSI_END		IO_WR(0x40018000 + 0x0c, (3 << 8)); // CS = 1
+
+static void ssi_read_write(char *data, uint len) {
+	uint i;
+	for (i = 0; i < len; ++i) {
+		while (!(IO_RD(0x18000028) & (1 << 1)));
+		IO_WR(0x18000060, data[i]);
+
+		while (!(IO_RD(0x18000028) & (1 << 2)));
+		while (IO_RD(0x18000028) & (1 << 0));
+
+		while (!(IO_RD(0x18000028) & (1 << 3)));
+		data[i] = IO_RD(0x18000060);
+	}
+}
+
+
 static void delay(int t) {
 	while (t--)
 		asm volatile ("nop");
