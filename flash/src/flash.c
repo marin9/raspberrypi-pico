@@ -97,6 +97,7 @@ void flash_sector_write(uint addr, char *d) {
 	uint i;
 	uint offset = 0;
 
+	flash_sector_erase(addr);
 	for (i = 0; i < 16; ++i) {
 		flash_page_write(addr + offset, d + offset);
 		offset += PAGE_SIZE;
