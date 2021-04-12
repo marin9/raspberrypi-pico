@@ -52,7 +52,7 @@ void task_create(void (*func)()){
 			break;
 
 	if (i == TASK_COUNT)
-		return;
+		while (1);
 
 	task[i].sp = (uint*)(stack + i * STACK_SIZE + STACK_SIZE);
 	task[i].sp -= sizeof(struct context_t);

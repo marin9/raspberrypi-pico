@@ -16,7 +16,6 @@
 context_switch:
 	push {lr}
 	push {r0}
-	//mrs r11, apsr
 	push {r0-r3}
 	push {r4-r7}
     mov  r4, r8
@@ -36,7 +35,6 @@ context_switch:
     mov  r11, r7
     pop  {r4-r7}
 	pop {r0-r3}
-	//msr apsr, r11
 	pop {r0}
 	mov lr, r0
 	pop {pc}
