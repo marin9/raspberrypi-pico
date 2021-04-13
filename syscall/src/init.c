@@ -12,7 +12,7 @@ void delay(uint t) {
 }
 
 
-void init() {
+void init(uint x) {
 	xosc_init();
 	IO_WR(CLOCKS_BASE+0x48, 0x880); // clk_peri enble
 
@@ -35,8 +35,11 @@ void init() {
 	while (1) {
 		delay(1000000);
 		uart_print("call svc\r\n");
+		asm volatile ("mov r0, #2");
+		asm volatile ("mov r1, #7");
 		asm volatile ("svc #5");
-		asm volatile ("svc #9");
-		asm volatile ("svc #2");
+		asm volatile ("mov r4, r2");
+		uart_hex(x);
+		uart_print("\r\n");
 	}
 }

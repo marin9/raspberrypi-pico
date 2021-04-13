@@ -33,9 +33,18 @@ static void hardfault_handler() {
 
 void svccall_handler_c(uint *sp) {
 	uint svc_number = ((char *)sp[6])[-2];
+	uint svc_arg1 = sp[0];
+	uint svc_arg2 = sp[1];
+	uint result = svc_arg1 + svc_arg2;
+
 	uart_print("SVC num = ");
 	uart_hex(svc_number);
 	uart_print("\r\n");
+
+	uart_print("arg1 + arg2 = ");
+	uart_hex(result);
+	uart_print("\r\n");
+	sp[2] = result;
 	delay(500000);
 }
 
