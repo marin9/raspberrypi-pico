@@ -2,6 +2,7 @@
 #include "arm.h"
 #include "nvic.h"
 #include "systick.h"
+#include "uart.h"
 
 #define TASK_UNUSED		0
 #define TASK_READY		1
@@ -86,25 +87,39 @@ static void task_yield() {
 	__asm__("nop");
 }
 
-void pendsv_handler() {
-	task_t *prev = active_task;
-uart_print("pendsv handler\r\n");
-	if (prev && prev->status == TASK_READY)
-		queue_push(&ready_queue, prev);
+void load_context(void* psp) {
+	asm volatile ("mov sp, %0 \n" : : "r" (psp));
+	asm volatile(
+	"pop  {r4-r7} \n"
+	"mov  r8, r4 \n"
+	"mov  r9, r5 \n"
+	"mov  r10, r6 \n"
+	"mov  r11, r7 \n"
+	"pop  {r4-r7} \n"
+	);
+}
 
+void __attribute__((naked)) pendsv_handler()  {
+	void* reg;
+	asm volatile(
+	"push {r4-r7} \n"
+	"mov  r4, r8 \n"
+	"mov  r5, r9 \n"
+	"mov  r6, r10 \n"
+	"mov  r7, r11 \n"
+	"push {r4-r7} \n"
+	"mov %0, sp \n" : "=r" (reg)
+	);
+
+
+	if (active_task != 0) {
+		active_task->sp = reg;
+		queue_push(&ready_queue, active_task);
+	}
 	active_task = queue_pop(&ready_queue);
 
-uart_print("prev: ");
-uart_hex(prev);
-uart_print(" active: ");
-uart_hex(active_task);
-uart_print("\r\n");
-
-	if (prev)
-		arm_switch(prev, active_task);
-	else
-		arm_switch((void*)0x20030000, active_task);
-
+	load_context(active_task->sp);
+	__asm__("bx %0" : : "r" (0xFFFFFFF9));
 }
 
 void systick_handler() {
@@ -135,9 +150,7 @@ void systick_handler() {
 static void idle() {
 	while (1) {
 		SYS_ENTRY();
-		uart_print("idle\r\n");
 		task_yield();
-		uart_print("idle after yield\r\n");
 		SYS_EXIT();
 	}
 }
@@ -184,7 +197,7 @@ int thread_start(thread_func func, void *args) {
 	}
 
 	task[i].status = TASK_READY;
-	task[i].sp = (uint*)(stack[i] + STACK_SIZE - 8);
+	task[i].sp = (uint*)(stack[i] + STACK_SIZE);
 	task[i].sp -= sizeof(context_t);
 
 	context_t *ctx = (context_t*)task[i].sp;
