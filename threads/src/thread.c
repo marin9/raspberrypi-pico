@@ -111,9 +111,8 @@ void __attribute__((naked)) pendsv_handler()  {
 	"mov %0, sp \n" : "=r" (reg)
 	);
 
-
+	active_task->sp = reg;
 	if (active_task != 0 && active_task->status == TASK_READY) {
-		active_task->sp = reg;
 		queue_push(&ready_queue, active_task);
 	}
 	active_task = queue_pop(&ready_queue);
@@ -172,7 +171,7 @@ void rtos_init() {
 void rtos_start() {
 	nvic_init();
 	systick_init();
-	//systick_set(12000-1);
+	systick_set(12000-1);
 	sched_running = 1;
 	task_yield();
 }
