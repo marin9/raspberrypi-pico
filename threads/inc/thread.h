@@ -16,8 +16,8 @@ typedef struct {
 
 typedef struct task_t {
 	uint *sp;
-	uint param;
 	uint status;
+	uint param;
 	struct task_t *next;
 } task_t;
 

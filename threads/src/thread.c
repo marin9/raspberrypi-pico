@@ -1,17 +1,17 @@
 #include "thread.h"
-#include "arm.h"
 #include "nvic.h"
 #include "systick.h"
 #include "uart.h"
 
 #define TASK_UNUSED		0
 #define TASK_READY		1
+#define TASK_BLOCKED	2
 
-#define SYS_ENTRY()		arm_intds()
-#define SYS_EXIT()		arm_inten()
+#define SYS_ENTRY()		asm volatile("cpsid i")
+#define SYS_EXIT()		asm volatile("cpsie i")
 
-static uint scheduler;
 static uint sys_time;
+static uint sched_running;
 static task_t *active_task;
 static queue_t ready_queue;
 static queue_t sleep_queue;
@@ -112,7 +112,7 @@ void __attribute__((naked)) pendsv_handler()  {
 	);
 
 
-	if (active_task != 0) {
+	if (active_task != 0 && active_task->status == TASK_READY) {
 		active_task->sp = reg;
 		queue_push(&ready_queue, active_task);
 	}
@@ -126,15 +126,14 @@ void systick_handler() {
 	int sched;
 	task_t *t;
 
-	if (!scheduler)
-		return;
-
 	sys_time += 1;
+
 	sched = 0;
 	t = queue_peek(&sleep_queue);
 	while (t) {
 		if (sys_time >= t->param) {
 			t = queue_pop(&sleep_queue);
+			t->status = TASK_READY;
 			queue_push(&ready_queue, t);
 			t = queue_peek(&sleep_queue);
 			sched = 1;
@@ -143,7 +142,7 @@ void systick_handler() {
 		}
 	}
 
-	if (sched)
+	if (sched && sched_running)
 		task_yield();
 }
 
@@ -160,7 +159,7 @@ void rtos_init() {
 	int i;
 	active_task = 0;
 	sys_time = 0;
-	scheduler = 0;
+	sched_running = 0;
 
 	for (i = 0; i < TASK_COUNT; ++i)
 		task[i].status = TASK_UNUSED;
@@ -174,7 +173,7 @@ void rtos_start() {
 	nvic_init();
 	systick_init();
 	//systick_set(12000-1);
-	scheduler = 1;
+	sched_running = 1;
 	task_yield();
 }
 
@@ -207,7 +206,7 @@ int thread_start(thread_func func, void *args) {
   	ctx->r0 = (uint)args;
 
 	queue_push(&ready_queue, &task[i]);
-	if (scheduler)
+	if (sched_running)
 		task_yield();
 	SYS_EXIT();
 	return ERR_OK;
@@ -216,6 +215,7 @@ int thread_start(thread_func func, void *args) {
 void thread_sleep(uint ticks) {
 	SYS_ENTRY();
 	if (ticks) {
+		active_task->status = TASK_BLOCKED;
 		active_task->param = ticks + sys_time;
 		queue_pushsort(&sleep_queue, active_task);
 	}
@@ -248,6 +248,7 @@ int sem_wait(sem_t *sem) {
 	if (sem->value > 0) {
 		sem->value -= 1;
 	} else {
+		active_task->status = TASK_BLOCKED;
 		queue_push(&(sem->waitq), active_task);
 		task_yield();
 	}
@@ -265,12 +266,12 @@ int sem_signal(sem_t *sem) {
 	SYS_ENTRY();
 	tmp = queue_pop(&(sem->waitq));
 	if (tmp) {
+		tmp->status = TASK_READY;
 		queue_push(&ready_queue, tmp);
 		task_yield();
 	} else {
 		sem->value += 1;
 	}
-
 	SYS_EXIT();
 	return ret;
 }

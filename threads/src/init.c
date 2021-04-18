@@ -3,7 +3,6 @@
 #include "xosc.h"
 #include "uart.h"
 #include "thread.h"
-#include "arm.h"
 
 
 void t1() {
