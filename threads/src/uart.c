@@ -1,4 +1,6 @@
 #include "uart.h"
+#include "gpio.h"
+#include "resets.h"
 
 struct uart_hw {
 	uint dr;
@@ -18,8 +20,7 @@ struct uart_hw {
 	uint icr;
 };
 
-#define uart0 ((volatile struct uart_hw*)UART0_BASE)
-#define uart1 ((volatile struct uart_hw*)UART1_BASE)
+#define uart ((volatile struct uart_hw*)UART0_BASE)
 
 #define FR_TXFE		(1 << 7)
 #define FR_RXFF		(1 << 6)
@@ -38,30 +39,25 @@ struct uart_hw {
 #define CR_UARTEN	(1 << 0)
 
 
-void uart_init(uint id) {
-	volatile struct uart_hw *uart;
-
-	if (id == 0)
-		uart = uart0;
-	else
-		uart = uart1;
+void uart_init() {
+	IO_WR(CLOCKS_BASE + 0x48, 0x880); // clk_peri enable
+	reset_release_wait(RESET_IO_BANK0);
+	reset_release_wait(RESET_PADS_BANK0);
+	reset_release_wait(RESET_UART0);
 
 	uart->cr = 0;
 	uart->ibrd = 6; // 115200
 	uart->fbrd = 33;
 	uart->lcr_h = LCR_WLEN_8 | LCR_FEN;
 	uart->cr = CR_TXE | CR_RXE | CR_UARTEN;
+
+	gpio_init(0, GPIO_FUNC_UART);
+	gpio_init(1, GPIO_FUNC_UART);
+	gpio_dir(0, 1);
 }
 
-uint uart_read(uint id, char *buff, uint len) {
+uint uart_read(char *buff, uint len) {
 	uint i;
-	volatile struct uart_hw *uart;
-
-	if (id == 0)
-		uart = uart0;
-	else
-		uart = uart1;
-
 	for (i = 0; i < len; ++i) {
 		while (uart->fr & FR_RXFE);
 		buff[i] = uart->dr & 0xFF;
@@ -69,15 +65,8 @@ uint uart_read(uint id, char *buff, uint len) {
 	return i;
 }
 
-uint uart_write(uint id, char *buff, uint len) {
+uint uart_write(char *buff, uint len) {
 	uint i;
-	volatile struct uart_hw *uart;
-
-	if (id == 0)
-		uart = uart0;
-	else
-		uart = uart1;
-
 	for (i = 0; i < len; ++i) {
 		while (uart->fr & FR_TXFF);
 
@@ -88,7 +77,6 @@ uint uart_write(uint id, char *buff, uint len) {
 
 static void hex2str(char *str, int n) {
 	int i, hb;
-
 	for (i = 0; i < 8; ++i) {
 		hb = n >> (7 - i) * 4;
 		hb &= 0x0F;
@@ -103,7 +91,7 @@ static void hex2str(char *str, int n) {
 
 void uart_print(char *s) {
 	while (*s) {
-		uart_write(0, s, 1);
+		uart_write(s, 1);
 		++s;
 	}
 }

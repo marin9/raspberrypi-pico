@@ -107,43 +107,39 @@ void* save_context() {
 	);
 	return reg;
 }
-//TODO down
+
 void __attribute__((naked)) pendsv_handler()  {
-	void* reg = save_context();
+	void* reg;
+	task_t* tmp;
 
+	// save context of current thread
+	reg = save_context();
 	active_task->sp = reg;
-
 	if (active_task != 0 && active_task->status == TASK_READY) {
 		queue_push(&ready_queue, active_task);
 	}
-	active_task = queue_pop(&ready_queue);
 
-	load_context(active_task->sp);
-}
-
-void systick_handler() {
-	int sched;
-	task_t *t;
-
-	sys_time += 1;
-
-	sched = 0;
-	t = queue_peek(&sleep_queue);
-	while (t) {
-		if (sys_time >= t->param) {
-			t = queue_pop(&sleep_queue);
-			t->status = TASK_READY;
-			queue_push(&ready_queue, t);
-			t = queue_peek(&sleep_queue);
-			sched = 1;
+	// check sleeping threads
+	tmp = queue_peek(&sleep_queue);
+	while (tmp) {
+		if (sys_time >= tmp->param) {
+			tmp = queue_pop(&sleep_queue);
+			tmp->status = TASK_READY;
+			queue_push(&ready_queue, tmp);
+			tmp = queue_peek(&sleep_queue);
 		} else {
 			break;
 		}
 	}
 
-	if (sched && sched_running)
-		PEND_SV();
-}//TODO up
+	// load new context of next thread
+	active_task = queue_pop(&ready_queue);
+	load_context(active_task->sp);
+}
+
+void systick_handler() {
+	sys_time += 1;
+}
 
 static void idle() {
 	while (1)
