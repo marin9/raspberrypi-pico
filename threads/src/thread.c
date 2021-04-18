@@ -1,7 +1,5 @@
 #include "thread.h"
-#include "nvic.h"
 #include "systick.h"
-#include "uart.h"
 
 #define TASK_UNUSED		0
 #define TASK_READY		1
@@ -84,16 +82,16 @@ static task_t* queue_peek(queue_t *q) {
 
 
 void load_context(void* psp) {
-	asm volatile ("mov sp, %0 \n" : : "r" (psp));
 	asm volatile(
-	"pop  {r4-r7} \n"
-	"mov  r8, r4 \n"
-	"mov  r9, r5 \n"
-	"mov  r10, r6 \n"
-	"mov  r11, r7 \n"
-	"pop  {r4-r7} \n"
+	"mov sp, %0		\n"
+	"pop  {r4-r7}	\n"
+	"mov  r8, r4	\n"
+	"mov  r9, r5	\n"
+	"mov  r10, r6	\n"
+	"mov  r11, r7	\n"
+	"pop  {r4-r7}	\n"
+	"bx %1			\n" : : "r" (psp), "r" (0xFFFFFFF9)
 	);
-	asm volatile ("bx %0" : : "r" (0xFFFFFFF9));
 }
 
 void* save_context() {
@@ -109,7 +107,7 @@ void* save_context() {
 	);
 	return reg;
 }
-
+//TODO down
 void __attribute__((naked)) pendsv_handler()  {
 	void* reg = save_context();
 
@@ -145,21 +143,18 @@ void systick_handler() {
 
 	if (sched && sched_running)
 		PEND_SV();
-}
+}//TODO up
 
 static void idle() {
-	while (1) {
-		SYS_ENTRY();
+	while (1)
 		PEND_SV();
-		SYS_EXIT();
-	}
 }
 
 
 void rtos_init() {
 	int i;
-	active_task = 0;
 	sys_time = 0;
+	active_task = 0;
 	sched_running = 0;
 
 	for (i = 0; i < TASK_COUNT; ++i)
@@ -171,10 +166,8 @@ void rtos_init() {
 }
 
 void rtos_start() {
-	nvic_init();
-	systick_init();
-	systick_set(12000-1);
 	sched_running = 1;
+	systick_set(12000-1);
 	PEND_SV();
 }
 
@@ -183,20 +176,20 @@ uint rtos_ticks() {
 }
 
 
-int thread_start(thread_func func, void *args) {
+uint thread_start(thread_func func, void *args) {
 	int i;
 
 	SYS_ENTRY();
-	for (i = 0; i < TASK_COUNT; ++i)
-		if (!task[i].status)
+	for (i = 0; i < TASK_COUNT; ++i) {
+		if (!task[i].status) {
 			break;
-
-	if (i >= TASK_COUNT) {
-		SYS_EXIT();
-		return -ERR_NORES;
+		}
+		if (i == TASK_COUNT - 1) {
+			SYS_EXIT();
+			return ERR_NORES;
+		}
 	}
 
-	task[i].status = TASK_READY;
 	task[i].sp = (uint*)(stack[i] + STACK_SIZE);
 	task[i].sp -= sizeof(context_t);
 
@@ -206,9 +199,11 @@ int thread_start(thread_func func, void *args) {
   	ctx->pc = (uint)func;
   	ctx->r0 = (uint)args;
 
+	task[i].status = TASK_READY;
 	queue_push(&ready_queue, &task[i]);
 	if (sched_running)
 		PEND_SV();
+
 	SYS_EXIT();
 	return ERR_OK;
 }
@@ -230,20 +225,18 @@ void thread_terminate() {
 	PEND_SV();
 }
 
-int sem_init(sem_t *sem, uint value) {
+uint sem_init(sem_t *sem, uint value) {
 	if (!sem)
-		return -ERR_PARAMS;
+		return ERR_PARAMS;
 
 	sem->value = value;
 	queue_init(&sem->waitq);
 	return ERR_OK;
 }
 
-int sem_wait(sem_t *sem) {
-	int ret = ERR_OK;
-
+uint sem_wait(sem_t *sem) {
 	if (!sem)
-		return -ERR_PARAMS;
+		return ERR_PARAMS;
 
 	SYS_ENTRY();
 	if (sem->value > 0) {
@@ -254,15 +247,14 @@ int sem_wait(sem_t *sem) {
 		PEND_SV();
 	}
 	SYS_EXIT();
-	return ret;
+	return ERR_OK;
 }
 
-int sem_signal(sem_t *sem) {
-	int ret = ERR_OK;
+uint sem_signal(sem_t *sem) {
 	task_t *tmp;
 
 	if (!sem)
-		return -ERR_PARAMS;
+		return ERR_PARAMS;
 
 	SYS_ENTRY();
 	tmp = queue_pop(&(sem->waitq));
@@ -274,5 +266,5 @@ int sem_signal(sem_t *sem) {
 		sem->value += 1;
 	}
 	SYS_EXIT();
-	return ret;
+	return ERR_OK;
 }

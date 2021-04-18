@@ -2,7 +2,9 @@
 #include "gpio.h"
 #include "xosc.h"
 #include "uart.h"
+#include "nvic.h"
 #include "thread.h"
+#include "systick.h"
 
 
 void t1() {
@@ -36,6 +38,8 @@ void init() {
 	gpio_init(0, GPIO_FUNC_UART);
 	gpio_init(1, GPIO_FUNC_UART);
 	gpio_dir(0, 1);
+	nvic_init();
+	systick_init();
 
 	rtos_init();
 
@@ -43,7 +47,5 @@ void init() {
 	thread_start(t2, 0);
 	thread_start(t3, 0);
 
-	uart_print("start os\r\n");
 	rtos_start();
-	uart_print("os started\r\n");
 }

@@ -31,13 +31,14 @@ typedef struct {
 	queue_t waitq;
 } sem_t;
 
+
 void rtos_init();
 void rtos_start();
 uint rtos_ticks();
 
-int thread_start(thread_func func, void *args);
+uint thread_start(thread_func func, void *args);
 void thread_sleep(uint ticks);
 void thread_terminate();
-int sem_init(sem_t *sem, uint value);
-int sem_signal(sem_t *sem);
-int sem_wait(sem_t *sem);
+uint sem_init(sem_t *sem, uint value);
+uint sem_signal(sem_t *sem);
+uint sem_wait(sem_t *sem);
