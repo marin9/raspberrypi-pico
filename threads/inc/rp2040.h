@@ -63,9 +63,9 @@
 #define PPB_BASE					0xE0000000
 
 
-typedef unsigned int uint;
-typedef unsigned short ushort;
-typedef unsigned char byte;
+typedef unsigned int	uint;
+typedef unsigned short	ushort;
+typedef unsigned char	byte;
 
 #define IO_RD(addr)            *((volatile uint*)(addr))
 #define IO_WR(addr, data)      *((volatile uint*)(addr)) = (data)

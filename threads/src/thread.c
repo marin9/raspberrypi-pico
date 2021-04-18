@@ -9,6 +9,9 @@
 
 #define SYS_ENTRY()		asm volatile("cpsid i")
 #define SYS_EXIT()		asm volatile("cpsie i")
+#define PEND_SV()		do { *((uint*)0xE000ED04) = (1 << 28); \
+						asm volatile ("nop\nnop\nnop\nnop\n"); \
+						} while (0)
 
 static uint sys_time;
 static uint sched_running;
@@ -79,13 +82,6 @@ static task_t* queue_peek(queue_t *q) {
 	return q->first;
 }
 
-static void task_yield() {
-	*((uint*)0xE000ED04) = (1 << 28);
-	__asm__("nop");
-	__asm__("nop");
-	__asm__("nop");
-	__asm__("nop");
-}
 
 void load_context(void* psp) {
 	asm volatile ("mov sp, %0 \n" : : "r" (psp));
@@ -97,10 +93,11 @@ void load_context(void* psp) {
 	"mov  r11, r7 \n"
 	"pop  {r4-r7} \n"
 	);
+	asm volatile ("bx %0" : : "r" (0xFFFFFFF9));
 }
 
-void __attribute__((naked)) pendsv_handler()  {
-	void* reg;
+void* save_context() {
+	void *reg;
 	asm volatile(
 	"push {r4-r7} \n"
 	"mov  r4, r8 \n"
@@ -110,15 +107,20 @@ void __attribute__((naked)) pendsv_handler()  {
 	"push {r4-r7} \n"
 	"mov %0, sp \n" : "=r" (reg)
 	);
+	return reg;
+}
+
+void __attribute__((naked)) pendsv_handler()  {
+	void* reg = save_context();
 
 	active_task->sp = reg;
+
 	if (active_task != 0 && active_task->status == TASK_READY) {
 		queue_push(&ready_queue, active_task);
 	}
 	active_task = queue_pop(&ready_queue);
 
 	load_context(active_task->sp);
-	__asm__("bx %0" : : "r" (0xFFFFFFF9));
 }
 
 void systick_handler() {
@@ -142,13 +144,13 @@ void systick_handler() {
 	}
 
 	if (sched && sched_running)
-		task_yield();
+		PEND_SV();
 }
 
 static void idle() {
 	while (1) {
 		SYS_ENTRY();
-		task_yield();
+		PEND_SV();
 		SYS_EXIT();
 	}
 }
@@ -173,7 +175,7 @@ void rtos_start() {
 	systick_init();
 	systick_set(12000-1);
 	sched_running = 1;
-	task_yield();
+	PEND_SV();
 }
 
 uint rtos_ticks() {
@@ -206,7 +208,7 @@ int thread_start(thread_func func, void *args) {
 
 	queue_push(&ready_queue, &task[i]);
 	if (sched_running)
-		task_yield();
+		PEND_SV();
 	SYS_EXIT();
 	return ERR_OK;
 }
@@ -218,14 +220,14 @@ void thread_sleep(uint ticks) {
 		active_task->param = ticks + sys_time;
 		queue_pushsort(&sleep_queue, active_task);
 	}
-	task_yield();
+	PEND_SV();
 	SYS_EXIT();
 }
 
 void thread_terminate() {
 	SYS_ENTRY();
 	active_task->status = TASK_UNUSED;
-	task_yield();
+	PEND_SV();
 }
 
 int sem_init(sem_t *sem, uint value) {
@@ -249,7 +251,7 @@ int sem_wait(sem_t *sem) {
 	} else {
 		active_task->status = TASK_BLOCKED;
 		queue_push(&(sem->waitq), active_task);
-		task_yield();
+		PEND_SV();
 	}
 	SYS_EXIT();
 	return ret;
@@ -267,7 +269,7 @@ int sem_signal(sem_t *sem) {
 	if (tmp) {
 		tmp->status = TASK_READY;
 		queue_push(&ready_queue, tmp);
-		task_yield();
+		PEND_SV();
 	} else {
 		sem->value += 1;
 	}

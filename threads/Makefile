@@ -21,7 +21,7 @@ all: build $(TARGET).bin $(TARGET).uf2
 run: build $(TARGET).bin $(TARGET).uf2
 	@echo " Copy to MCU"
 	@mkdir -p /mnt/pico
-	@sudo mount /dev/sdb1 /mnt/pico
+	@sudo mount /dev/sda1 /mnt/pico
 	@cp $(TARGET).uf2 /mnt/pico
 	@sync
 	@sudo umount /mnt/pico

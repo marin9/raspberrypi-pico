@@ -8,21 +8,21 @@
 void t1() {
 	while (1) {
 		uart_print("T1\r\n");
-		thread_sleep(1000);
+		thread_sleep(100);
 	}
 }
 
 void t2() {
 	while (1) {
 		uart_print("T 2\r\n");
-		thread_sleep(2000);
+		thread_sleep(1000);
 	}
 }
 
 void t3() {
 	while (1) {
 		uart_print("T  3\r\n");
-		thread_sleep(3000);
+		thread_sleep(2000);
 	}
 }
 

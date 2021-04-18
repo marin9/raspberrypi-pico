@@ -19,15 +19,7 @@ void systick_init() {
 	systick->csr = CSR_ENABLE | CSR_CLKSRC | CSR_TICKINT;
 }
 
-void systick_deinit() {
-	systick->csr = 0;
-}
-
 void systick_set(uint value) {
 	systick->rvr = value;
 	systick->cvr = value;
-}
-
-uint systick_get() {
-	return systick->cvr;
 }
