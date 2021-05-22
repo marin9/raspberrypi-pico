@@ -41,6 +41,7 @@ struct uart_hw {
 
 void uart_init() {
 	IO_WR(CLOCKS_BASE + 0x48, 0x880); // clk_peri enable
+	IO_WR(CLOCKS_BASE + 0x30, 0x2);
 	reset_release_wait(RESET_IO_BANK0);
 	reset_release_wait(RESET_PADS_BANK0);
 	reset_release_wait(RESET_UART0);

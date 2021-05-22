@@ -12,13 +12,13 @@ static sem_t sem1;
 static void thread_x(void *args){
 	int i;
 	while (1) {
-		sem_wait(&sem1);
+		//sem_wait(&sem1);
 		for (i = 0; i < 5; ++i) {
 			uart_print((char*)args);
-			thread_sleep(10);
+			thread_sleep(1000);
 		}
-		sem_signal(&sem1);
-		thread_sleep(10);
+		//sem_signal(&sem1);
+		thread_sleep(1000);
 	}
 }
 
@@ -90,8 +90,8 @@ void init() {
 	rtos_init();
 
 	//test_threads();
-	test_time();
-	//test_sem();
+	//test_time();
+	test_sem();
 
 	rtos_start();
 }
