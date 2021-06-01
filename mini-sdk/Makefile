@@ -19,12 +19,7 @@ OBJC	= $(SRC:src/%.c=build/%.o)
 all: build $(TARGET).bin $(TARGET).list $(TARGET).uf2
 
 run: build $(TARGET).bin $(TARGET).list $(TARGET).uf2
-	@echo " Copy to MCU"
-	@mkdir -p /mnt/pico
-	@sudo mount /dev/sda1 /mnt/pico
-	@cp $(TARGET).uf2 /mnt/pico
-	@sync
-	@sudo umount /mnt/pico
+	pirun.sh
 
 clean :
 		@echo " Clean"
