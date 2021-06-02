@@ -9,8 +9,8 @@
 
 //TODO WFE, WFI, SEV
 //TODO PSR, PRIMASK, CONTROL
-//TODO continue at 2.4.4.1
 
+//TODO continue at 2.6.3.1, sys.
 // sio.c sio.h rp2040.h OK
 
 void delay(int t) {
