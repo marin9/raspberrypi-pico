@@ -19,6 +19,8 @@ reset:
 .balign 0x100
 
 
+
+
 .text
 .align 4
 .force_thumb
@@ -31,9 +33,9 @@ __aeabi_idiv:
 1:	b 1f
 1:	b 1f
 1:	b 1f
-1:
-	ldr r0, [r3, #0x70]
+1:	ldr r0, [r3, #0x70]
 	bx lr
+
 
 .text
 .align 4
@@ -47,9 +49,41 @@ __aeabi_idivmod:
 1:	b 1f
 1:	b 1f
 1:	b 1f
-1:
-	ldr r0, [r3, #0x74]
+1:	ldr r0, [r3, #0x74]
 	bx lr
+
+
+.text
+.align 4
+.force_thumb
+.global __aeabi_udiv
+__aeabi_udiv:
+	ldr r3, =0xD0000000
+	str r0, [r3, #0x60]
+	str r1, [r3, #0x64]
+	b 1f
+1:	b 1f
+1:	b 1f
+1:	b 1f
+1:	ldr r0, [r3, #0x70]
+	bx lr
+
+
+.text
+.align 4
+.force_thumb
+.global __aeabi_udivmod
+__aeabi_udivmod:
+	ldr r3, =0xD0000000
+	str r0, [r3, #0x60]
+	str r1, [r3, #0x64]
+	b 1f
+1:	b 1f
+1:	b 1f
+1:	b 1f
+1:	ldr r0, [r3, #0x74]
+	bx lr
+
 
 
 

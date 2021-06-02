@@ -107,9 +107,6 @@ uint spinlock_get(uint n) {
 	return *SPINLOCK_ST & (1 << n);
 }
 
-//TODO continue at 2.3.2. Interrupts
-//TODO div
-
 uint spinlock_lock(uint n) {
 	uint notlocked = *(SPINLOCK_N + 4 * n);
 	if (notlocked)

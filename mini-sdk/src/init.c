@@ -7,6 +7,12 @@
 #include "systick.h"
 
 
+//TODO WFE, WFI, SEV
+//TODO PSR, PRIMASK, CONTROL
+//TODO continue at 2.4.4.1
+
+// sio.c sio.h OK
+
 void delay(int t) {
 	while (t--)
 		asm volatile ("nop");
