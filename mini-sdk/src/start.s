@@ -56,8 +56,8 @@ __aeabi_idivmod:
 .text
 .align 4
 .force_thumb
-.global __aeabi_udiv
-__aeabi_udiv:
+.global __aeabi_uidiv
+__aeabi_uidiv:
 	ldr r3, =0xD0000000
 	str r0, [r3, #0x60]
 	str r1, [r3, #0x64]
@@ -72,8 +72,8 @@ __aeabi_udiv:
 .text
 .align 4
 .force_thumb
-.global __aeabi_udivmod
-__aeabi_udivmod:
+.global __aeabi_uidivmod
+__aeabi_uidivmod:
 	ldr r3, =0xD0000000
 	str r0, [r3, #0x60]
 	str r1, [r3, #0x64]

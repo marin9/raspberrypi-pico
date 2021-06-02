@@ -11,7 +11,7 @@
 //TODO PSR, PRIMASK, CONTROL
 //TODO continue at 2.4.4.1
 
-// sio.c sio.h OK
+// sio.c sio.h rp2040.h OK
 
 void delay(int t) {
 	while (t--)
